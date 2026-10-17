@@ -1,0 +1,5 @@
+# hasil build plugin (lihat README bagian 2)
+build.log
+cmake.log
+__pycache__/
+*.pyc

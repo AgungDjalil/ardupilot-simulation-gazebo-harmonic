@@ -1,0 +1,945 @@
+<?xml version="1.0" ?>
+<!-- Based on "Finals Prize Round World 08" (DARPA SubT Finals, Louisville Mega Cavern)
+     by Open Robotics, CC BY 4.0:
+     https://app.gazebosim.org/OpenRobotics/fuel/worlds/Finals%20Prize%20Round%20World%2008
+     Adapted for ArduPilot SITL by tools/convert_subt_world.py -->
+<sdf version="1.9">
+  <world name="cave_megacavern">
+    <physics name="1ms" type="dart">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <dart>
+        <collision_detector>bullet</collision_detector>
+      </dart>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu" />
+    <plugin filename="gz-sim-navsat-system" name="gz::sim::systems::NavSat" />
+    <scene>
+      <ambient>0.35 0.35 0.35 1.0</ambient>
+      <background>0 0 0 1.0</background>
+      <grid>false</grid>
+      <origin_visual>false</origin_visual>
+    </scene>
+    <atmosphere type="adiabatic">
+      <temperature>288</temperature>
+      <temperature_gradient>0.3</temperature_gradient>
+    </atmosphere>
+    <include>
+      <static>true</static>
+      <name>staging_area</name>
+      <pose>-13 0 -0.01 0 0 -1.5708</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Finals Staging Area</uri>
+    </include>
+    <include>
+      <name>megacavern</name>
+      <pose>80.11 -36.666 -1.107 0 0 1.11418329</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/megacavern</uri>
+    </include>
+    <light name="spot_1" type="spot">
+      <pose>11.7077 8.296990 0.044 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_2" type="spot">
+      <pose>11.6699 13.0656 0.044 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_3" type="spot">
+      <pose>10.4957 20.0639 -0.25 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_4" type="spot">
+      <pose>13.5104 26.8401 -0.25 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_5" type="spot">
+      <pose>16.3263 29.6719 -0.25 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_6" type="spot">
+      <pose>26.7149 27.7989  -0.469528 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_7" type="spot">
+      <pose>24.2046 38.2067 -1.07708 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_8" type="spot">
+      <pose>18.5134 35.7323 -0.877919 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_9" type="spot">
+      <pose>20.3816 43.7368 -0.877919 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_10" type="spot">
+      <pose>24.7801 47.9431 -1.12525 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_11" type="spot">
+      <pose>19.7304 51.9161 -0.902161 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_12" type="spot">
+      <pose>23.856 65.1884 -1.12537 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_21" type="spot">
+      <pose>8.02554 8.68812 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_22" type="spot">
+      <pose>5.79569 14.1511 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_23" type="spot">
+      <pose>6.14098 19.7873 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_24" type="spot">
+      <pose>6.27344 24.9204 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_25" type="spot">
+      <pose>6.6375 31.653 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_26" type="spot">
+      <pose>6.99038 37.3743 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_27" type="spot">
+      <pose>2.04506 30.304 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_28" type="spot">
+      <pose>2.61329 36.6815 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_29" type="spot">
+      <pose>-3.283940 38.8907 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_30" type="spot">
+      <pose>-8.36488 41.0023 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_31" type="spot">
+      <pose>-11.8971 41.0023 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_32" type="spot">
+      <pose>-10.8982 35.485 0.25599 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_33" type="spot">
+      <pose>-15.9656 43.7759 -0.766429 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_34" type="spot">
+      <pose>-16.3272 48.4986 -0.766429 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_35" type="spot">
+      <pose>-16.7419 54.3922 -0.766429 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_36" type="spot">
+      <pose>-19.1505 65.251 1.05306 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_37" type="spot">
+      <pose>-4.01057 82.2431 1.05306 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_38" type="spot">
+      <pose>18.7452 84.4881 5.53012 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_39" type="spot">
+      <pose>15.6364 79.5066 5.53012 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>5</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_40" type="spot">
+      <pose>13.0206 47.6884 0.34053 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_50" type="spot">
+      <pose>13.5202 4.20005 -0.065913 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_51" type="spot">
+      <pose>19.9886 4.788440 -0.065913 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_52" type="spot">
+      <pose>26.6838 4.78844 -0.065913 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_53" type="spot">
+      <pose>34.0114 -2.84515 -0.065913 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_54" type="spot">
+      <pose>39.8313 -11.0518 0.301527 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_55" type="spot">
+      <pose>29.7981 17.3082 -0.087719 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_56" type="spot">
+      <pose>33.0528 29.2998 -0.437564 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_57" type="spot">
+      <pose>41.9173 34.873 -1.0412 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_58" type="spot">
+      <pose>44.9402 43.5247 -1.0412 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_59" type="spot">
+      <pose>40.0419 54.5755 -1.0412 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_60" type="spot">
+      <pose>41.915 63.4848 -1.0412 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_61" type="spot">
+      <pose>48.6827 66.8388 -1.09393 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_62" type="spot">
+      <pose>50.1602 71.897 -1.16262 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_63" type="spot">
+      <pose>54.6683 71.897 -1.3526 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light name="spot_64" type="spot">
+      <pose>55.1152 86.358 -1.36929 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.1</linear>
+        <constant>0.05</constant>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>2.0</inner_angle>
+        <outer_angle>3.1</outer_angle>
+        <falloff>0.4</falloff>
+      </spot>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <include>
+      <static>true</static>
+      <name>cube_1</name>
+      <pose>37.3629 42.3185 -0.49377 0 -0 1.11418</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/SubT Challenge Cube</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>cube_2</name>
+      <pose>28.5429 34.5325 -2.951640 0 -0 1.11418</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/SubT Challenge Cube</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>phone_1</name>
+      <pose>19.1554 56.724 0.772505 -1.5708 -0 1.56424</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Samsung J8 Black</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>phone_2</name>
+      <pose>16.2006 79.4233 -1.02824 -1.5708 0 1.11418</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Samsung J8 Black</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>backpack_1</name>
+      <pose>13.4762 76.6013 1.25183 0 -0 1.55052</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/JanSport Backpack Red</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>backpack_2</name>
+      <pose>-17.5573 67.3883 -2.62565 0 -0 1.45722</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/JanSport Backpack Red</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>rescue_randy_1</name>
+      <pose>57.875300 64.649900 -2.028650 0 0.077698 2.466260</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Rescue Randy Sitting</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>rescue_randy_2</name>
+      <pose>16.283100 27.372300 -2.026530 0.481688 0.309708 2.449410</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Rescue Randy Sitting</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>extinguisher_1</name>
+      <pose>11.6262 16.6625 -2.418540 0 -0 1.11418</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Fire Extinguisher</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>extinguisher_2</name>
+      <pose>23.2746 39.3024 -2.81733 0 -0 1.11418</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Fire Extinguisher</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>rope_1</name>
+      <pose>39.349200 79.140700 -2.914240 0.278843 -1.004360 0.965755</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Climbing Rope</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>rope_2</name>
+      <pose>32.540800 -2.558920 -0.720507 -2.958020 1.497290 -1.661540</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Climbing Rope</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>drill_1</name>
+      <pose>11.527000 2.755120 -2.284970 0 -0 1.11418</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Black and Decker Cordless Drill</uri>
+    </include>
+    <include>
+      <static>true</static>
+      <name>drill_2</name>
+      <pose>22.2034 65.2276 -2.96571 0 -0 1.11418</pose>
+      <uri>https://fuel.gazebosim.org/1.0/openrobotics/models/Black and Decker Cordless Drill</uri>
+    </include>
+    <include>
+      <name>dynamic_rocks_1</name>
+      <pose>53.13 65.9585 -2.2 0 0 0</pose>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Medium Rock Fall</uri>
+    </include>
+    <spherical_coordinates>
+      <latitude_deg>-35.363262</latitude_deg>
+      <longitude_deg>149.165237</longitude_deg>
+      <elevation>584</elevation>
+      <heading_deg>0</heading_deg>
+      <surface_model>EARTH_WGS84</surface_model>
+    </spherical_coordinates>
+    <include>
+      <uri>model://iris_with_d435</uri>
+      <name>iris</name>
+      <pose>-12 0 0.195 0 0 0</pose>
+    </include>
+  </world>
+</sdf>

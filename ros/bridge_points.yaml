@@ -1,0 +1,7 @@
+# ros_gz_bridge: point cloud D435 (berat: ~300 ribu titik/frame dikemas di CPU).
+# Hanya dipakai dengan ./run_ros_bridge.sh --points
+- ros_topic_name: /d435/points
+  gz_topic_name: /d435/points
+  ros_type_name: sensor_msgs/msg/PointCloud2
+  gz_type_name: gz.msgs.PointCloudPacked
+  direction: GZ_TO_ROS

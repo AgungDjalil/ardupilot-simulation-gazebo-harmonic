@@ -1,0 +1,29 @@
+# Terbang tanpa GPS: EKF3 memakai External Navigation (posisi, kecepatan, yaw) dari sistem
+# vision simulasi SITL (sim:vicon di SERIAL5, VISION_POSITION_ESTIMATE + VISION_SPEED_ESTIMATE).
+# Posisinya diambil dari fisika Gazebo, jadi ini pengganti VIO/SLAM sungguhan (mis. T265, VOXL,
+# RTAB-Map). Dimuat oleh: ./run_sitl.sh --gazebo --gps-denied
+# Sama dengan Tools/autotest/default_params/copter-vicon.parm di ArduPilot, plus noise.
+
+AHRS_EKF_TYPE    3
+EK2_ENABLE       0
+EK3_ENABLE       1
+
+# Tidak ada GPS sama sekali
+GPS1_TYPE        0
+SIM_GPS1_ENABLE  0
+
+# Visual odometry lewat MAVLink di SERIAL5 (simulator vision)
+VISO_TYPE        1
+SERIAL5_PROTOCOL 2
+
+# EKF3 source set 1: semuanya dari ExtNav
+EK3_SRC1_POSXY   6
+EK3_SRC1_VELXY   6
+EK3_SRC1_POSZ    6
+EK3_SRC1_VELZ    6
+EK3_SRC1_YAW     6
+
+# Noise pengukuran vision (m, m/s); 0 = sempurna. Glitch bisa diuji saat terbang dengan
+# SIM_VICON_GLIT_X/Y/Z (m) atau SIM_VICON_FAIL 1 (vision hilang).
+SIM_VICON_P_SD   0.01
+SIM_VICON_V_SD   0.02
