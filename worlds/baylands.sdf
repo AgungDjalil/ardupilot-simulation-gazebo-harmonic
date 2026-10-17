@@ -1,0 +1,107 @@
+<?xml version="1.0" ?>
+<!-- Baylands Park (Sunnyvale, CA) with wind, for ArduPilot SITL.
+     Park model: "Baylands" by Open Robotics, CC BY 4.0
+     https://app.gazebosim.org/OpenRobotics/fuel/models/Baylands
+     SITL home must match <spherical_coordinates>:
+       ./run_sitl.sh --gazebo -l 37.4121731,-121.9988787,0,0 -->
+<sdf version="1.9">
+  <world name="baylands">
+    <physics name="1ms" type="dart">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <!-- DART's default collision detector is slow with the large park mesh -->
+      <dart>
+        <collision_detector>bullet</collision_detector>
+      </dart>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu" />
+    <plugin filename="gz-sim-navsat-system" name="gz::sim::systems::NavSat" />
+
+    <!-- Wind: steady 5 m/s blowing towards +x (east, i.e. a west wind) plus gusts. Only models
+         with <enable_wind>true</enable_wind> (e.g. iris_with_d435) feel it. Change it at runtime:
+           gz topic -t /world/baylands/wind -m gz.msgs.Wind \
+             -p 'linear_velocity: {x: 8, y: 0, z: 0}, enable_wind: true' -->
+    <wind>
+      <linear_velocity>5 0 0</linear_velocity>
+    </wind>
+    <plugin filename="gz-sim-wind-effects-system" name="gz::sim::systems::WindEffects">
+      <!-- Strength of the wind force. Measured on the hovering Iris: the default 1.0 tilts it ~27 deg
+           in 5 m/s wind; 0.3 gives ~2.6 deg at 5 m/s and ~5 deg at 10 m/s (0.12: ~0.6 deg). -->
+      <force_approximation_scaling_factor>0.3</force_approximation_scaling_factor>
+      <horizontal>
+        <magnitude>
+          <time_for_rise>10</time_for_rise>
+          <!-- gusts: +-20 % of the speed over 10 s, plus noise -->
+          <sin>
+            <amplitude_percent>0.2</amplitude_percent>
+            <period>10</period>
+          </sin>
+          <noise type="gaussian">
+            <mean>0</mean>
+            <stddev>0.3</stddev>
+          </noise>
+        </magnitude>
+        <direction>
+          <time_for_rise>30</time_for_rise>
+          <!-- direction swings +-10 deg over 30 s -->
+          <sin>
+            <amplitude>10</amplitude>
+            <period>30</period>
+          </sin>
+          <noise type="gaussian">
+            <mean>0</mean>
+            <stddev>2</stddev>
+          </noise>
+        </direction>
+      </horizontal>
+      <vertical>
+        <noise type="gaussian">
+          <mean>0</mean>
+          <stddev>0.1</stddev>
+        </noise>
+      </vertical>
+    </plugin>
+
+    <scene>
+      <ambient>0.6 0.6 0.6 1</ambient>
+      <background>0.7 0.8 0.95 1</background>
+      <sky />
+      <grid>false</grid>
+    </scene>
+    <spherical_coordinates>
+      <latitude_deg>37.412173071650805</latitude_deg>
+      <longitude_deg>-121.998878727967</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+      <surface_model>EARTH_WGS84</surface_model>
+    </spherical_coordinates>
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 100 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>-0.5 0.2 -0.9</direction>
+      <visualize>false</visualize>
+    </light>
+
+    <!-- Fuel's Baylands model with a tree material Gazebo Harmonic can render (models/baylands_park) -->
+    <include>
+      <uri>model://baylands_park</uri>
+      <name>baylands</name>
+    </include>
+
+    <!-- Open grass at the origin (ground z ~ -0.08 m, ~5 deg slope; trees start south of y = -2).
+         z = ground + Iris' standing height (0.195). -->
+    <include>
+      <uri>model://iris_with_d435</uri>
+      <name>iris</name>
+      <pose>0 0 0.12 0 0 0</pose>
+    </include>
+  </world>
+</sdf>

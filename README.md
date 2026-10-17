@@ -38,11 +38,13 @@ ardupilot_sim/
 ├── run_ros_bridge.sh      D435 camera -> ROS 2 + RViz2 (--points, --no-rviz)
 ├── stop_sim.sh            stop everything started by the scripts in this folder
 ├── worlds/                this project's worlds
+│   ├── baylands.sdf           Baylands park (Sunnyvale, CA), GPS, with wind
 │   ├── cave_megacavern.sdf    cave (DARPA SubT Finals), GPS-denied
 │   └── ego_forest_real.sdf    forest, GPS-denied
 ├── models/                this project's models
-│   ├── iris_with_d435/        Iris + ArduPilot + RealSense D435 (main drone)
+│   ├── iris_with_d435/        Iris + ArduPilot + RealSense D435 (main drone, feels wind)
 │   ├── realsense_d435/        RealSense D435 camera
+│   ├── baylands_park/         Fuel's Baylands model with a Harmonic-compatible tree material
 │   └── ego_forest_real_textures/  forest textures
 ├── params/
 │   ├── sitl_ports.parm    extra MAVLink ports + MAVROS stream rates (always loaded)
@@ -111,14 +113,26 @@ Each script in its own terminal, in this order. To stop: `./stop_sim.sh`.
 ./run_ros_bridge.sh
 ```
 
-### c. Runway with GPS (ardupilot_gazebo's own world)
+### c. Baylands park with GPS and wind
+
+```bash
+./run_gazebo.sh baylands.sdf
+./run_sitl.sh --gazebo -l 37.4121731,-121.9988787,0,0   # SITL home = the park (lat,lon,alt,heading)
+./run_ros_bridge.sh                                     # optional
+```
+
+The `-l` location must match the world (see [Wind](#wind-baylandssdf) and
+[Troubleshooting](#13-troubleshooting)); without it GPS and the QGC map show SITL's default home
+in Australia.
+
+### d. Runway with GPS (ardupilot_gazebo's own world)
 
 ```bash
 ./run_gazebo.sh                          # = iris_runway.sdf
 ./run_sitl.sh --gazebo
 ```
 
-### d. Without Gazebo (SITL's built-in physics, lightest)
+### e. Without Gazebo (SITL's built-in physics, lightest)
 
 ```bash
 ./run_sitl.sh
@@ -132,16 +146,38 @@ fly when the EKF status is green; with `--gps-denied` wait for the line
 
 | World | Drone | Camera | GPS | Notes |
 |---|---|---|---|---|
+| `baylands.sdf` | `iris_with_d435` | D435 | yes, `-l 37.4121731,-121.9988787,0,0` | Baylands Park, Sunnyvale CA (the outdoor world PX4 uses). **Wind** 5 m/s + gusts. Starts on open grass at the origin; trees begin south of y = -2. Ground ~0 m above sea level. |
 | `cave_megacavern.sdf` | `iris_with_d435` | D435 | use `--gps-denied` | Louisville Mega Cavern (SubT Finals World 08). Starts in the staging area (x = -12); the cave entrance is ~8 m ahead (+x). Staging area ceiling ~3.8 m. |
 | `ego_forest_real.sdf` | `iris_with_d435` | D435 | use `--gps-denied` | Natural forest. Starts at (0, 0). Flight area x 0..26, y -8..8; only the start point and the survey points x ∈ {0, 26}, y ∈ {-8, -4, 0, 4, 8} (radius 1.6 m) are guaranteed free of trees. |
 | `iris_runway.sdf` | `iris_with_gimbal` | gimbal camera 640×480 | yes | From ardupilot_gazebo. |
 | `iris_warehouse.sdf` | `iris_with_gimbal` | gimbal camera | yes | From ardupilot_gazebo. |
 | `zephyr_runway.sdf` | `zephyr_with_ardupilot` (plane) | – | yes | `./run_sitl.sh --gazebo -v ArduPlane -f gazebo-zephyr` (not tested in this project). |
 
-All worlds use SITL's default home location (CMAC, -35.363262, 149.165237, 584 m), the same as the
-worlds' `<spherical_coordinates>`.
+All worlds except Baylands use SITL's default home location (CMAC, -35.363262, 149.165237, 584 m),
+the same as the worlds' `<spherical_coordinates>`. Baylands needs `-l 37.4121731,-121.9988787,0,0`.
 
 There is no automatic obstacle avoidance: in the cave and the forest, fly slowly and in short legs.
+
+### Wind (`baylands.sdf`)
+
+| Setting | Value |
+|---|---|
+| Steady wind | 5 m/s towards +x (east, i.e. a west wind): `<wind><linear_velocity>5 0 0</linear_velocity></wind>` |
+| Gusts | speed ±20 % over 10 s + noise (σ 0.3 m/s), direction ±10° over 30 s + noise (σ 2°), vertical noise σ 0.1 m/s |
+| Strength | `<force_approximation_scaling_factor>0.3</force_approximation_scaling_factor>` (WindEffects plugin) |
+| Effect on the hovering Iris (measured) | ~2.6° tilt into the wind at 5 m/s (2.0–3.4° with gusts), ~5° at 10 m/s; position held within ~0.1 m |
+
+Change the wind while the simulation runs (x = east, y = north, m/s):
+
+```bash
+gz topic -t /world/baylands/wind -m gz.msgs.Wind -p 'linear_velocity: {x: 0, y: 10, z: 0}, enable_wind: true'   # 10 m/s towards north
+gz topic -t /world/baylands/wind -m gz.msgs.Wind -p 'linear_velocity: {x: 0, y: 0, z: 0}, enable_wind: true'    # calm
+```
+
+The gust and strength settings are in the WindEffects plugin of `worlds/baylands.sdf` (reload the
+world after editing). Only models with `<enable_wind>true</enable_wind>` feel the wind;
+`iris_with_d435` has it. To add wind to another world, copy the `<wind>` element and the
+WindEffects plugin. Note that SITL's own `SIM_WIND_*` parameters don't apply with Gazebo physics.
 
 ## 5. Scripts and options
 
@@ -259,6 +295,8 @@ More ports can be added to SITL with `-A`, e.g. UDP to a companion computer on t
 ## 7. Sensors on the drone
 
 The main drone `models/iris_with_d435` = `iris_with_ardupilot` (ardupilot_gazebo) + RealSense D435.
+Its `model.sdf` is generated from `iris_with_ardupilot` with `iris_with_standoffs` merged in (so the
+model's `<enable_wind>` reaches the body links); the ArduPilot plugin and aerodynamics are unchanged.
 With `--model JSON`, Gazebo sends SITL the IMU data, position, velocity and attitude at every
 physics step (1 kHz). The other sensors are simulated by SITL from that physical state.
 
@@ -386,6 +424,7 @@ python3 tools/convert_subt_world.py \
 
 | Symptom | Cause / fix |
 |---|---|
+| Takeoff fails (`MAV_RESULT_FAILED`) with `Terrain: clamping offset ...` | SITL's home altitude doesn't match the ground: the simulated rangefinder then reads tens of metres on the ground and ArduCopter refuses to "take off downwards". For Baylands use `-l 37.4121731,-121.9988787,0,0` (altitude 0) |
 | `Arm: Gyros inconsistent` for a few seconds after start | normal right after SITL starts; wait ~15 s and arm again |
 | `PrecLand: Failsafe Measures` when landing | precision landing is enabled (`gazebo-iris.parm`) but there is no IR-Lock target; safe to ignore |
 | QGC doesn't connect | QGC must listen on UDP 14550 (its default). A UDP 5760 comm link is useless (5760 is not a port of this SITL) |
@@ -398,6 +437,12 @@ python3 tools/convert_subt_world.py \
 
 ## 14. Sources and licenses
 
+- `worlds/baylands.sdf`, `models/baylands_park`: "Baylands" model by Open Robotics, CC BY 4.0
+  (https://app.gazebosim.org/OpenRobotics/fuel/models/Baylands, version 3). The meshes and textures
+  are loaded from Fuel; the wrapper only replaces the trees' Ogre 1 material script (black trees in
+  Gazebo Harmonic) with a PBR material using the same texture.
+- `models/iris_with_d435/model.sdf`: generated from ardupilot_gazebo's
+  `models/iris_with_ardupilot/model.sdf` (LGPL-3.0).
 - `worlds/cave_megacavern.sdf`: "Finals Prize Round World 08", Open Robotics, CC BY 4.0
   (https://app.gazebosim.org/OpenRobotics/fuel/worlds/Finals%20Prize%20Round%20World%2008).
   Changed: competition elements, models that can no longer be downloaded and the Fiducial markers
