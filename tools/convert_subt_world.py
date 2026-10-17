@@ -68,6 +68,10 @@ def main(src, dst):
     sub(sub(physics, 'dart'), 'collision_detector', 'bullet')
     # The cave is lit only by spot lights; a little more ambient light to see the drone.
     world.find('scene').find('ambient').text = '0.35 0.35 0.35 1.0'
+    # Keep the lights but don't draw their 47 green frustums in the GUI.
+    for light in world.iter('light'):
+        if light.find('visualize') is None:
+            sub(light, 'visualize', 'false')
 
     pos = list(world).index(world.find('scene'))
     for i, (filename, name) in enumerate(SYSTEMS):

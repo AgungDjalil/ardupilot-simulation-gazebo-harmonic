@@ -57,6 +57,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_2" type="spot">
       <pose>11.6699 13.0656 0.044 0 0 0</pose>
@@ -74,6 +75,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_3" type="spot">
       <pose>10.4957 20.0639 -0.25 0 0 0</pose>
@@ -91,6 +93,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_4" type="spot">
       <pose>13.5104 26.8401 -0.25 0 0 0</pose>
@@ -108,6 +111,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_5" type="spot">
       <pose>16.3263 29.6719 -0.25 0 0 0</pose>
@@ -125,6 +129,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_6" type="spot">
       <pose>26.7149 27.7989  -0.469528 0 0 0</pose>
@@ -142,6 +147,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_7" type="spot">
       <pose>24.2046 38.2067 -1.07708 0 0 0</pose>
@@ -159,6 +165,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_8" type="spot">
       <pose>18.5134 35.7323 -0.877919 0 0 0</pose>
@@ -176,6 +183,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_9" type="spot">
       <pose>20.3816 43.7368 -0.877919 0 0 0</pose>
@@ -193,6 +201,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_10" type="spot">
       <pose>24.7801 47.9431 -1.12525 0 0 0</pose>
@@ -210,6 +219,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_11" type="spot">
       <pose>19.7304 51.9161 -0.902161 0 0 0</pose>
@@ -227,6 +237,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_12" type="spot">
       <pose>23.856 65.1884 -1.12537 0 0 0</pose>
@@ -244,6 +255,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_21" type="spot">
       <pose>8.02554 8.68812 0.25599 0 0 0</pose>
@@ -261,6 +273,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_22" type="spot">
       <pose>5.79569 14.1511 0.25599 0 0 0</pose>
@@ -278,6 +291,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_23" type="spot">
       <pose>6.14098 19.7873 0.25599 0 0 0</pose>
@@ -295,6 +309,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_24" type="spot">
       <pose>6.27344 24.9204 0.25599 0 0 0</pose>
@@ -312,6 +327,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_25" type="spot">
       <pose>6.6375 31.653 0.25599 0 0 0</pose>
@@ -329,6 +345,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_26" type="spot">
       <pose>6.99038 37.3743 0.25599 0 0 0</pose>
@@ -346,6 +363,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_27" type="spot">
       <pose>2.04506 30.304 0.25599 0 0 0</pose>
@@ -363,6 +381,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_28" type="spot">
       <pose>2.61329 36.6815 0.25599 0 0 0</pose>
@@ -380,6 +399,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_29" type="spot">
       <pose>-3.283940 38.8907 0.25599 0 0 0</pose>
@@ -397,6 +417,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_30" type="spot">
       <pose>-8.36488 41.0023 0.25599 0 0 0</pose>
@@ -414,6 +435,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_31" type="spot">
       <pose>-11.8971 41.0023 0.25599 0 0 0</pose>
@@ -431,6 +453,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_32" type="spot">
       <pose>-10.8982 35.485 0.25599 0 0 0</pose>
@@ -448,6 +471,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_33" type="spot">
       <pose>-15.9656 43.7759 -0.766429 0 0 0</pose>
@@ -465,6 +489,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_34" type="spot">
       <pose>-16.3272 48.4986 -0.766429 0 0 0</pose>
@@ -482,6 +507,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_35" type="spot">
       <pose>-16.7419 54.3922 -0.766429 0 0 0</pose>
@@ -499,6 +525,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_36" type="spot">
       <pose>-19.1505 65.251 1.05306 0 0 0</pose>
@@ -516,6 +543,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_37" type="spot">
       <pose>-4.01057 82.2431 1.05306 0 0 0</pose>
@@ -533,6 +561,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_38" type="spot">
       <pose>18.7452 84.4881 5.53012 0 0 0</pose>
@@ -550,6 +579,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_39" type="spot">
       <pose>15.6364 79.5066 5.53012 0 0 0</pose>
@@ -567,6 +597,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_40" type="spot">
       <pose>13.0206 47.6884 0.34053 0 0 0</pose>
@@ -584,6 +615,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_50" type="spot">
       <pose>13.5202 4.20005 -0.065913 0 0 0</pose>
@@ -601,6 +633,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_51" type="spot">
       <pose>19.9886 4.788440 -0.065913 0 0 0</pose>
@@ -618,6 +651,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_52" type="spot">
       <pose>26.6838 4.78844 -0.065913 0 0 0</pose>
@@ -635,6 +669,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_53" type="spot">
       <pose>34.0114 -2.84515 -0.065913 0 0 0</pose>
@@ -652,6 +687,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_54" type="spot">
       <pose>39.8313 -11.0518 0.301527 0 0 0</pose>
@@ -669,6 +705,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_55" type="spot">
       <pose>29.7981 17.3082 -0.087719 0 0 0</pose>
@@ -686,6 +723,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_56" type="spot">
       <pose>33.0528 29.2998 -0.437564 0 0 0</pose>
@@ -703,6 +741,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_57" type="spot">
       <pose>41.9173 34.873 -1.0412 0 0 0</pose>
@@ -720,6 +759,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_58" type="spot">
       <pose>44.9402 43.5247 -1.0412 0 0 0</pose>
@@ -737,6 +777,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_59" type="spot">
       <pose>40.0419 54.5755 -1.0412 0 0 0</pose>
@@ -754,6 +795,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_60" type="spot">
       <pose>41.915 63.4848 -1.0412 0 0 0</pose>
@@ -771,6 +813,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_61" type="spot">
       <pose>48.6827 66.8388 -1.09393 0 0 0</pose>
@@ -788,6 +831,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_62" type="spot">
       <pose>50.1602 71.897 -1.16262 0 0 0</pose>
@@ -805,6 +849,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_63" type="spot">
       <pose>54.6683 71.897 -1.3526 0 0 0</pose>
@@ -822,6 +867,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <light name="spot_64" type="spot">
       <pose>55.1152 86.358 -1.36929 0 0 0</pose>
@@ -839,6 +885,7 @@
         <falloff>0.4</falloff>
       </spot>
       <cast_shadows>false</cast_shadows>
+      <visualize>false</visualize>
     </light>
     <include>
       <static>true</static>
