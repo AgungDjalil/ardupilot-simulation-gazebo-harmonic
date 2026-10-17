@@ -1,4 +1,4 @@
-# ros_gz_bridge: Gazebo -> ROS 2 (dipakai run_ros_bridge.sh)
+# ros_gz_bridge: Gazebo -> ROS 2 (used by run_ros_bridge.sh)
 - ros_topic_name: /clock
   gz_topic_name: /clock
   ros_type_name: rosgraph_msgs/msg/Clock

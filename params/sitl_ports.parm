@@ -1,10 +1,10 @@
-# Port MAVLink tambahan, selalu dimuat oleh run_sitl.sh (lihat README bagian 6).
+# Extra MAVLink ports, always loaded by run_sitl.sh (see README section 6).
 
-# SERIAL6 = TCP 5766 (--serial6=tcp:6), khusus Mission Planner / MAVProxy.
+# SERIAL6 = TCP 5766 (--serial6=tcp:6), for Mission Planner / MAVProxy.
 SERIAL6_PROTOCOL 2
 
-# Stream data di SERIAL2 (TCP 5763, MAVROS). MAVROS tidak meminta stream sendiri, jadi tanpa ini
-# /mavros/local_position/*, /mavros/imu/* dst. kosong. MAV3 = port MAVLink ke-3 (SERIAL0, 1, 2).
+# Data streams on SERIAL2 (TCP 5763, MAVROS). MAVROS doesn't request streams itself, so without
+# these /mavros/local_position/*, /mavros/imu/* etc. stay empty. MAV3 = 3rd MAVLink port (SERIAL0, 1, 2).
 MAV3_RAW_SENS    10
 MAV3_EXT_STAT    2
 MAV3_RC_CHAN     5

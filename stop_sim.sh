@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Hentikan SITL, Gazebo, bridge ROS 2 dan RViz2 yang dijalankan oleh run_*.sh di folder ini.
-# Gazebo dari launch EGO-Planner (gz sim -r -v 2 ...) tidak disentuh.
+# Stop SITL, Gazebo, the ROS 2 bridge and RViz2 started by the run_*.sh scripts in this folder.
+# A Gazebo started by another launch (e.g. EGO-Planner: gz sim -r -v 2 ...) is left alone.
 GZ=$(pgrep -f 'gz sim -v4 -r')
 GZ_CHILDREN=$(for p in $GZ; do pgrep -P "$p"; done)
 pkill -f 'rviz2 -d .*ardupilot_sim/ros/d435.rviz' 2>/dev/null

@@ -1,85 +1,86 @@
-# ardupilot_sim — Simulasi ArduPilot SITL + Gazebo
+# ardupilot-simulation-gazebo-harmonic
 
-Project khusus simulasi: ArduCopter SITL dengan Gazebo Harmonic, world gua dan hutan untuk terbang
-**tanpa GPS**, drone dengan kamera **Intel RealSense D435**, bridge kamera ke **ROS 2 Jazzy / RViz2**,
-dan kontrol lewat **MAVLink** (QGroundControl, Mission Planner, MAVProxy, MAVROS, pymavlink, MCP).
+A simulation-only project: ArduCopter SITL with Gazebo Harmonic, cave and forest worlds for
+**GPS-denied** flight, a drone with an **Intel RealSense D435** camera, a camera bridge to
+**ROS 2 Jazzy / RViz2**, and control over **MAVLink** (QGroundControl, Mission Planner, MAVProxy,
+MAVROS, pymavlink, MCP).
 
-Tidak bergantung pada `~/Projects/ego_planner_ws`. Simulasi inti tidak butuh ROS; ROS 2 hanya
-dipakai oleh `run_ros_bridge.sh`.
+It doesn't depend on any ROS workspace. The core simulation needs no ROS at all; ROS 2 is only
+used by `run_ros_bridge.sh`.
 
 ---
 
-## Daftar isi
+## Contents
 
-1. [Struktur folder](#1-struktur-folder)
-2. [Prasyarat](#2-prasyarat)
-3. [Cara menjalankan](#3-cara-menjalankan)
-4. [World yang tersedia](#4-world-yang-tersedia)
-5. [Skrip dan opsinya](#5-skrip-dan-opsinya)
-6. [MAVLink: port dan cara terhubung](#6-mavlink-port-dan-cara-terhubung)
-7. [Sensor pada drone](#7-sensor-pada-drone)
-8. [Terbang tanpa GPS (`--gps-denied`)](#8-terbang-tanpa-gps---gps-denied)
-9. [Kamera di ROS 2 / RViz2](#9-kamera-di-ros-2--rviz2)
-10. [Kontrol lewat Claude (MCP server `mavlink`)](#10-kontrol-lewat-claude-mcp-server-mavlink)
-11. [Performa: CPU vs GPU](#11-performa-cpu-vs-gpu)
-12. [Menambah world dan vehicle](#12-menambah-world-dan-vehicle)
+1. [Folder layout](#1-folder-layout)
+2. [Requirements](#2-requirements)
+3. [Running](#3-running)
+4. [Available worlds](#4-available-worlds)
+5. [Scripts and options](#5-scripts-and-options)
+6. [MAVLink: ports and how to connect](#6-mavlink-ports-and-how-to-connect)
+7. [Sensors on the drone](#7-sensors-on-the-drone)
+8. [GPS-denied flight (`--gps-denied`)](#8-gps-denied-flight---gps-denied)
+9. [Camera in ROS 2 / RViz2](#9-camera-in-ros-2--rviz2)
+10. [Control from Claude (MCP server `mavlink`)](#10-control-from-claude-mcp-server-mavlink)
+11. [Performance: CPU vs GPU](#11-performance-cpu-vs-gpu)
+12. [Adding worlds and vehicles](#12-adding-worlds-and-vehicles)
 13. [Troubleshooting](#13-troubleshooting)
-14. [Sumber dan lisensi](#14-sumber-dan-lisensi)
+14. [Sources and licenses](#14-sources-and-licenses)
 
 ---
 
-## 1. Struktur folder
+## 1. Folder layout
 
 ```
 ardupilot_sim/
-├── run_gazebo.sh          Gazebo (argumen: nama world)
+├── run_gazebo.sh          Gazebo (argument: world name)
 ├── run_sitl.sh            ArduCopter SITL (--gazebo, --gps-denied)
-├── run_ros_bridge.sh      kamera D435 -> ROS 2 + RViz2 (--points, --no-rviz)
-├── stop_sim.sh            hentikan semua yang dijalankan skrip di folder ini
-├── worlds/                world sendiri
-│   ├── cave_megacavern.sdf    gua (DARPA SubT Finals), tanpa GPS
-│   └── ego_forest_real.sdf    hutan (dari ego_planner_ws), tanpa GPS
-├── models/                model sendiri
-│   ├── iris_with_d435/        Iris + ArduPilot + RealSense D435 (drone utama)
-│   ├── realsense_d435/        kamera RealSense D435
-│   └── ego_forest_real_textures/  tekstur hutan
+├── run_ros_bridge.sh      D435 camera -> ROS 2 + RViz2 (--points, --no-rviz)
+├── stop_sim.sh            stop everything started by the scripts in this folder
+├── worlds/                this project's worlds
+│   ├── cave_megacavern.sdf    cave (DARPA SubT Finals), GPS-denied
+│   └── ego_forest_real.sdf    forest, GPS-denied
+├── models/                this project's models
+│   ├── iris_with_d435/        Iris + ArduPilot + RealSense D435 (main drone)
+│   ├── realsense_d435/        RealSense D435 camera
+│   └── ego_forest_real_textures/  forest textures
 ├── params/
-│   ├── sitl_ports.parm    port MAVLink tambahan + stream rate MAVROS (selalu dimuat)
-│   └── gps_denied.parm    parameter ArduPilot untuk terbang tanpa GPS
+│   ├── sitl_ports.parm    extra MAVLink ports + MAVROS stream rates (always loaded)
+│   └── gps_denied.parm    ArduPilot parameters for GPS-denied flight
 ├── ros/
 │   ├── bridge.yaml        ros_gz_bridge: RGB, depth, camera_info, clock
-│   ├── bridge_points.yaml ros_gz_bridge: point cloud (opsional)
-│   └── d435.rviz          konfigurasi RViz2
+│   ├── bridge_points.yaml ros_gz_bridge: point cloud (optional)
+│   └── d435.rviz          RViz2 configuration
 ├── tools/
-│   ├── convert_subt_world.py  membuat worlds/cave_megacavern.sdf dari world Fuel
-│   └── set_ekf_origin.py      set EKF origin (dipakai otomatis oleh --gps-denied)
-└── ardupilot_gazebo/      clone upstream ArduPilot/ardupilot_gazebo + build plugin
-                           (jangan taruh file sendiri di sini)
+│   ├── convert_subt_world.py  builds worlds/cave_megacavern.sdf from the Fuel world
+│   └── set_ekf_origin.py      sets the EKF origin (run automatically by --gps-denied)
+└── ardupilot_gazebo/      git submodule: ArduPilot/ardupilot_gazebo + plugin build
+                           (don't put your own files here)
 ```
 
-`worlds/` dan `models/` dicari Gazebo **lebih dulu** daripada `ardupilot_gazebo/worlds|models`.
+Gazebo searches `worlds/` and `models/` **before** `ardupilot_gazebo/worlds|models`.
 
-## 2. Prasyarat
+## 2. Requirements
 
-| Komponen | Lokasi / versi |
+| Component | Location / version |
 |---|---|
-| ArduPilot (SITL) | `~/Projects/ardupilot` (ubah dengan env `ARDUPILOT_DIR`), venv `~/venv-ardupilot` |
+| ArduPilot (SITL) | `~/Projects/ardupilot` (change with the `ARDUPILOT_DIR` env variable), venv `~/venv-ardupilot` |
 | Gazebo | Harmonic (`gz sim`, gz-sim 8) |
-| Plugin ArduPilot-Gazebo | `ardupilot_gazebo/build/libArduPilotPlugin.so` (sudah di-build) |
-| ROS 2 (opsional) | Jazzy di `/opt/ros/jazzy`, paket `ros_gz_bridge`, `rviz2` |
-| GPU | NVIDIA via PRIME offload (otomatis); `GZ_NVIDIA=0` untuk iGPU |
+| ArduPilot Gazebo plugin | `ardupilot_gazebo/build/libArduPilotPlugin.so` (build it, see below) |
+| ROS 2 (optional) | Jazzy in `/opt/ros/jazzy`, packages `ros_gz_bridge`, `rviz2` (and `mavros` for MAVROS) |
+| GPU | NVIDIA through PRIME offload (automatic); `GZ_NVIDIA=0` for the integrated GPU |
 
-### Clone dan build
+### Clone and build
 
-`ardupilot_gazebo` adalah git submodule (repo resmi ArduPilot, dikunci ke satu commit):
+`ardupilot_gazebo` is a git submodule (the official ArduPilot repository, pinned to one commit):
 
 ```bash
 git clone --recursive https://github.com/AgungDjalil/ardupilot-simulation-gazebo-harmonic.git ardupilot_sim
 cd ardupilot_sim
-# sudah di-clone tanpa --recursive?  git submodule update --init
+# cloned without --recursive?  git submodule update --init
 ```
 
-Build plugin (sekali setelah clone, dan setelah submodule diperbarui):
+Build the plugin (once after cloning, and after updating the submodule):
 
 ```bash
 cd ardupilot_gazebo
@@ -87,21 +88,22 @@ GZ_VERSION=harmonic cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j
 ```
 
-Model dari Gazebo Fuel (gua ±1 GB) diunduh otomatis ke `~/.gz/fuel` saat world pertama kali dibuka.
+Models from Gazebo Fuel (the cave is ~1 GB) are downloaded to `~/.gz/fuel` the first time a world
+is opened.
 
-## 3. Cara menjalankan
+## 3. Running
 
-Setiap skrip di terminal sendiri, berurutan. Berhenti: `./stop_sim.sh`.
+Each script in its own terminal, in this order. To stop: `./stop_sim.sh`.
 
-### a. Gua tanpa GPS + kamera di RViz2
+### a. Cave, GPS-denied, camera in RViz2
 
 ```bash
-./run_gazebo.sh cave_megacavern.sdf      # terminal 1, tunggu jendela Gazebo terbuka
+./run_gazebo.sh cave_megacavern.sdf      # terminal 1, wait for the Gazebo window
 ./run_sitl.sh --gazebo --gps-denied      # terminal 2
-./run_ros_bridge.sh                      # terminal 3 (opsional): RViz2
+./run_ros_bridge.sh                      # terminal 3 (optional): RViz2
 ```
 
-### b. Hutan tanpa GPS + kamera di RViz2
+### b. Forest, GPS-denied, camera in RViz2
 
 ```bash
 ./run_gazebo.sh ego_forest_real.sdf
@@ -109,99 +111,101 @@ Setiap skrip di terminal sendiri, berurutan. Berhenti: `./stop_sim.sh`.
 ./run_ros_bridge.sh
 ```
 
-### c. Landasan pacu dengan GPS (world bawaan ardupilot_gazebo)
+### c. Runway with GPS (ardupilot_gazebo's own world)
 
 ```bash
 ./run_gazebo.sh                          # = iris_runway.sdf
 ./run_sitl.sh --gazebo
 ```
 
-### d. Tanpa Gazebo (fisika bawaan SITL, paling ringan)
+### d. Without Gazebo (SITL's built-in physics, lightest)
 
 ```bash
 ./run_sitl.sh
 ```
 
-Setelah SITL jalan, **QGroundControl tersambung otomatis** (UDP 14550). Siap terbang bila status
-EKF hijau; di mode `--gps-denied` tunggu baris `set_ekf_origin: EKF origin set ...` di terminal 2.
+Once SITL is running, **QGroundControl connects automatically** (UDP 14550). The drone is ready to
+fly when the EKF status is green; with `--gps-denied` wait for the line
+`set_ekf_origin: EKF origin set ...` in terminal 2.
 
-## 4. World yang tersedia
+## 4. Available worlds
 
-| World | Drone | Kamera | GPS | Keterangan |
+| World | Drone | Camera | GPS | Notes |
 |---|---|---|---|---|
-| `cave_megacavern.sdf` | `iris_with_d435` | D435 | pakai `--gps-denied` | Gua Louisville Mega Cavern (SubT Finals World 08). Start di staging area (x = -12), mulut gua ±8 m di depan (+x). Atap staging area ±3.8 m. |
-| `ego_forest_real.sdf` | `iris_with_d435` | D435 | pakai `--gps-denied` | Hutan alami dari ego_planner_ws. Start di (0, 0). Area terbang x 0..26, y -8..8; yang dijamin bebas pohon hanya titik start dan titik survey x ∈ {0, 26}, y ∈ {-8, -4, 0, 4, 8} (radius 1.6 m). |
-| `iris_runway.sdf` | `iris_with_gimbal` | kamera gimbal 640×480 | ya | Bawaan ardupilot_gazebo. |
-| `iris_warehouse.sdf` | `iris_with_gimbal` | kamera gimbal | ya | Bawaan ardupilot_gazebo. |
-| `zephyr_runway.sdf` | `zephyr_with_ardupilot` (pesawat) | – | ya | `./run_sitl.sh --gazebo -v ArduPlane -f gazebo-zephyr` (belum diuji di project ini). |
+| `cave_megacavern.sdf` | `iris_with_d435` | D435 | use `--gps-denied` | Louisville Mega Cavern (SubT Finals World 08). Starts in the staging area (x = -12); the cave entrance is ~8 m ahead (+x). Staging area ceiling ~3.8 m. |
+| `ego_forest_real.sdf` | `iris_with_d435` | D435 | use `--gps-denied` | Natural forest. Starts at (0, 0). Flight area x 0..26, y -8..8; only the start point and the survey points x ∈ {0, 26}, y ∈ {-8, -4, 0, 4, 8} (radius 1.6 m) are guaranteed free of trees. |
+| `iris_runway.sdf` | `iris_with_gimbal` | gimbal camera 640×480 | yes | From ardupilot_gazebo. |
+| `iris_warehouse.sdf` | `iris_with_gimbal` | gimbal camera | yes | From ardupilot_gazebo. |
+| `zephyr_runway.sdf` | `zephyr_with_ardupilot` (plane) | – | yes | `./run_sitl.sh --gazebo -v ArduPlane -f gazebo-zephyr` (not tested in this project). |
 
-Semua world memakai lokasi home SITL default (CMAC, -35.363262, 149.165237, 584 m), sama dengan
-`<spherical_coordinates>` di world.
+All worlds use SITL's default home location (CMAC, -35.363262, 149.165237, 584 m), the same as the
+worlds' `<spherical_coordinates>`.
 
-Tidak ada penghindar rintangan otomatis: di gua dan hutan terbangkan pelan dan pendek.
+There is no automatic obstacle avoidance: in the cave and the forest, fly slowly and in short legs.
 
-## 5. Skrip dan opsinya
+## 5. Scripts and options
 
 ### `run_gazebo.sh [world.sdf]`
 
 | | |
 |---|---|
 | Default world | `iris_runway.sdf` |
-| Pencarian world/model | `worlds/`, `models/`, lalu `ardupilot_gazebo/worlds`, `ardupilot_gazebo/models` |
-| GPU | NVIDIA PRIME offload; `GZ_NVIDIA=0 ./run_gazebo.sh ...` untuk iGPU |
+| World/model search path | `worlds/`, `models/`, then `ardupilot_gazebo/worlds`, `ardupilot_gazebo/models` |
+| GPU | NVIDIA PRIME offload; `GZ_NVIDIA=0 ./run_gazebo.sh ...` for the integrated GPU |
 
-### `run_sitl.sh [opsi] [argumen sim_vehicle.py]`
+### `run_sitl.sh [options] [sim_vehicle.py arguments]`
 
-| Opsi | Efek |
+| Option | Effect |
 |---|---|
-| (tanpa opsi) | ArduCopter dengan fisika bawaan SITL (quad +), tanpa Gazebo |
-| `--gazebo` | `-f gazebo-iris --model JSON`: fisika dari Gazebo lewat UDP 9002 |
-| `--gps-denied` | GPS mati, posisi dari simulator vision (ExtNav) di SERIAL5, `params/gps_denied.parm`, EKF origin diset otomatis |
-| `-A "..."` | argumen tambahan untuk binary SITL (digabung, tidak menimpa setelan skrip) |
-| (selalu) | port MAVLink sesuai [bagian 6](#6-mavlink-port-dan-cara-terhubung), `params/sitl_ports.parm` |
-| lainnya | diteruskan ke `sim_vehicle.py`, mis. `-v ArduPlane -f gazebo-zephyr`, `--add-param-file=...`, `-L lokasi` |
+| (none) | ArduCopter with SITL's built-in physics (+ quad), no Gazebo |
+| `--gazebo` | `-f gazebo-iris --model JSON`: physics from Gazebo over UDP 9002 |
+| `--gps-denied` | GPS off, position from the simulated vision system (ExtNav) on SERIAL5, `params/gps_denied.parm`, EKF origin set automatically |
+| `-A "..."` | extra arguments for the SITL binary (merged, they don't replace the script's own) |
+| (always) | MAVLink ports as in [section 6](#6-mavlink-ports-and-how-to-connect), `params/sitl_ports.parm` |
+| anything else | passed to `sim_vehicle.py`, e.g. `-v ArduPlane -f gazebo-zephyr`, `--add-param-file=...`, `-L location` |
 
-Parameter selalu mulai bersih (`-w`, eeprom dihapus). Output SITL: `tail -f /tmp/ArduCopter.log`.
+Parameters always start clean (`-w`, eeprom wiped). SITL output: `tail -f /tmp/ArduCopter.log`.
 
 ### `run_ros_bridge.sh [--points] [--no-rviz]`
 
-Lihat [bagian 9](#9-kamera-di-ros-2--rviz2).
+See [section 9](#9-camera-in-ros-2--rviz2).
 
 ### `stop_sim.sh`
 
-Mematikan SITL, Gazebo, bridge dan RViz2 yang dijalankan skrip folder ini. Gazebo dari launch
-EGO-Planner tidak disentuh.
+Stops SITL, Gazebo, the bridge and RViz2 started by this folder's scripts. A Gazebo started by
+another project's launch file is left alone.
 
-## 6. MAVLink: port dan cara terhubung
+## 6. MAVLink: ports and how to connect
 
-Vehicle: **system ID 1, component ID 1**, MAVLink 2. Setiap aplikasi punya port sendiri, jadi
-semuanya bisa tersambung **bersamaan**:
+Vehicle: **system ID 1, component ID 1**, MAVLink 2. Each application has its own port, so they can
+all be connected **at the same time**:
 
-| Port | Serial ArduPilot | Untuk | Cara terhubung |
+| Port | ArduPilot serial | For | How to connect |
 |---|---|---|---|
-| **UDP 14550** | SERIAL0 (SITL mengirim ke `127.0.0.1:14550`) | **QGroundControl** | otomatis, cukup buka QGC |
-| **TCP 5762** | SERIAL1 | **MCP server `mavlink`** (Claude) | otomatis (`MAVLINK_URL`) |
+| **UDP 14550** | SERIAL0 (SITL sends to `127.0.0.1:14550`) | **QGroundControl** | automatic, just open QGC |
+| **TCP 5762** | SERIAL1 | **MCP server `mavlink`** (Claude) | automatic (`MAVLINK_URL`) |
 | **TCP 5763** | SERIAL2 | **MAVROS** | `fcu_url:=tcp://127.0.0.1:5763` |
-| **TCP 5766** | SERIAL6 | **Mission Planner** / MAVProxy / skrip | TCP, host `127.0.0.1`, port `5766` |
-| (internal) | SERIAL5 (`sim:vicon`) | simulator vision `--gps-denied` | – |
+| **TCP 5766** | SERIAL6 | **Mission Planner** / MAVProxy / scripts | TCP, host `127.0.0.1`, port `5766` |
+| (internal) | SERIAL5 (`sim:vicon`) | simulated vision system for `--gps-denied` | – |
 
-- Port TCP adalah server di `0.0.0.0`: bisa juga diakses dari PC lain di jaringan
-  (`<IP laptop ini>:5766`, mis. Mission Planner di Windows), selama firewall mengizinkan.
-- Satu port TCP = satu klien. Klien kedua di port yang sama harus menunggu yang pertama putus.
-- SITL tidak menunggu koneksi apa pun untuk mulai; jalankan klien (QGC, MAVROS, Mission Planner)
-  setelah SITL jalan.
-- Dengan `--gps-denied`, `tools/set_ekf_origin.py` memakai TCP 5766 beberapa detik saat start (sampai
-  `EKF origin set`), lalu melepasnya. Sambungkan Mission Planner setelah itu.
-- SERIAL6 dan stream rate MAVROS diatur di `params/sitl_ports.parm` (selalu dimuat oleh
+- The TCP ports are servers on `0.0.0.0`: they can also be reached from another PC on the network
+  (`<this machine's IP>:5766`, e.g. Mission Planner on Windows), if the firewall allows it.
+- One TCP port = one client. A second client on the same port has to wait until the first
+  disconnects.
+- SITL doesn't wait for any connection to start; start the clients (QGC, MAVROS, Mission Planner)
+  after SITL is running.
+- With `--gps-denied`, `tools/set_ekf_origin.py` uses TCP 5766 for a few seconds at start-up (until
+  `EKF origin set`) and then releases it. Connect Mission Planner after that.
+- SERIAL6 and the MAVROS stream rates are set in `params/sitl_ports.parm` (always loaded by
   `run_sitl.sh`).
 
-Port internal lain (bukan MAVLink): UDP 9002 Gazebo ↔ SITL (JSON fisika), UDP 5501 input RC SITL,
-UDP 9005 simulasi IR-Lock.
+Other internal ports (not MAVLink): UDP 9002 Gazebo ↔ SITL (JSON physics), UDP 5501 SITL RC input,
+UDP 9005 IR-Lock simulation.
 
 ### QGroundControl
 
-Buka QGC; drone muncul sendiri (QGC mendengarkan UDP 14550 secara default). Jangan buat comm link
-UDP 5760 — itu bukan port simulasi ini.
+Open QGC; the drone shows up by itself (QGC listens on UDP 14550 by default). Don't add a UDP 5760
+comm link — that is not a port of this simulation.
 
 ### MAVROS (ROS 2 Jazzy) — TCP 5763
 
@@ -210,113 +214,113 @@ source /opt/ros/jazzy/setup.bash
 ros2 launch mavros apm.launch fcu_url:=tcp://127.0.0.1:5763
 ```
 
-- `/mavros/state` → `connected: true`. Stream data di port ini sudah diatur
-  (`MAV3_*` di `params/sitl_ports.parm`): `/mavros/local_position/pose` dan `/mavros/imu/data`
-  ±20 Hz, `/mavros/battery` 2 Hz.
-- Ubah rate saat jalan: `ros2 service call /mavros/set_stream_rate mavros_msgs/srv/StreamRate
+- `/mavros/state` → `connected: true`. The data streams on this port are preset
+  (`MAV3_*` in `params/sitl_ports.parm`): `/mavros/local_position/pose` and `/mavros/imu/data` at
+  ~20 Hz, `/mavros/battery` at 2 Hz.
+- Change the rate at runtime: `ros2 service call /mavros/set_stream_rate mavros_msgs/srv/StreamRate
   "{stream_id: 0, message_rate: 20, on_off: true}"`.
-- Tanpa GPS (`--gps-denied`) posisi lokal tetap ada di `/mavros/local_position/*`; `global_position`
-  dihitung dari EKF origin.
-- Jangan pakai MAVROS di 5762 (milik MCP) atau 14550 (milik QGC).
+- GPS-denied (`--gps-denied`): the local position is still in `/mavros/local_position/*`;
+  `global_position` is derived from the EKF origin.
+- Don't connect MAVROS to 5762 (used by MCP) or 14550 (used by QGC).
 
 ### Mission Planner — TCP 5766
 
-Mission Planner ada di `~/MissionPlanner` (jalan dengan `mono`):
+On Linux Mission Planner runs with `mono`, e.g. from `~/MissionPlanner`:
 
 ```bash
 cd ~/MissionPlanner && mono MissionPlanner.exe
 ```
 
-Di pojok kanan atas pilih **TCP** → **Connect** → host `127.0.0.1` → port `5766`.
-Dari PC Windows lain: host = IP laptop ini (`hostname -I`), port `5766`.
+In the top right corner pick **TCP** → **Connect** → host `127.0.0.1` → port `5766`.
+From another Windows PC: host = this machine's IP (`hostname -I`), port `5766`.
 
 ### MAVProxy / pymavlink — TCP 5766
 
 ```bash
-mavproxy.py --master tcp:127.0.0.1:5766          # dari ~/venv-ardupilot
+mavproxy.py --master tcp:127.0.0.1:5766          # from ~/venv-ardupilot
 python3 -c "from pymavlink import mavutil; m = mavutil.mavlink_connection('tcp:127.0.0.1:5766'); print(m.wait_heartbeat())"
 ```
 
-MAVProxy dan Mission Planner berbagi 5766; kalau keduanya perlu bersamaan, teruskan dari MAVProxy:
-`mavproxy.py --master tcp:127.0.0.1:5766 --out udp:127.0.0.1:14551` lalu Mission Planner pakai
+MAVProxy and Mission Planner share 5766; if you need both at once, forward from MAVProxy:
+`mavproxy.py --master tcp:127.0.0.1:5766 --out udp:127.0.0.1:14551` and connect Mission Planner over
 **UDP** port 14551.
 
-### Menambah output MAVLink
+### Adding MAVLink outputs
 
-Port lain bisa ditambahkan ke SITL dengan `-A`, mis. UDP ke companion computer di jaringan
-(SERIAL7, protokol MAVLink harus diaktifkan juga):
+More ports can be added to SITL with `-A`, e.g. UDP to a companion computer on the network
+(SERIAL7; its MAVLink protocol must be enabled too):
 
 ```bash
 ./run_sitl.sh --gazebo -A "--serial7=udpclient:192.168.1.50:14551"
-# lalu set parameter SERIAL7_PROTOCOL = 2 (QGC/MAVProxy/MCP set_param) dan reboot,
-# atau tambahkan "SERIAL7_PROTOCOL 2" ke params/sitl_ports.parm
+# then set SERIAL7_PROTOCOL = 2 (QGC/MAVProxy/MCP set_param) and reboot,
+# or add "SERIAL7_PROTOCOL 2" to params/sitl_ports.parm
 ```
 
-## 7. Sensor pada drone
+## 7. Sensors on the drone
 
-Drone utama `models/iris_with_d435` = `iris_with_ardupilot` (ardupilot_gazebo) + RealSense D435.
-Dengan `--model JSON`, Gazebo mengirim ke SITL setiap langkah fisika (1 kHz): data IMU, posisi,
-kecepatan dan attitude. Sensor lain disimulasikan oleh SITL dari keadaan fisika itu.
+The main drone `models/iris_with_d435` = `iris_with_ardupilot` (ardupilot_gazebo) + RealSense D435.
+With `--model JSON`, Gazebo sends SITL the IMU data, position, velocity and attitude at every
+physics step (1 kHz). The other sensors are simulated by SITL from that physical state.
 
-| Sensor | Disimulasikan oleh | Detail |
+| Sensor | Simulated by | Details |
 |---|---|---|
-| **IMU** (gyro + akselerometer) | Gazebo (`imu_sensor`, 1000 Hz) | ArduPilot melihat 2 IMU (`INS_GYR_ID`, `INS_GYR2_ID`) dari data yang sama + noise SITL |
-| **Barometer** | SITL | 2 barometer (`BARO1_DEVID`, `BARO2_DEVID`) |
-| **Kompas** | SITL | 3 magnetometer (`COMPASS_DEV_ID..3`) |
-| **GPS** | SITL | GPS1 5 Hz (`SIM_GPS1_HZ`). **Mati** dengan `--gps-denied` (`GPS1_TYPE 0`) |
-| **Rangefinder bawah** | SITL | `RNGFND1_TYPE 1`, menghadap bawah, maks 50 m (dari `gazebo-iris.parm`, untuk precision landing). Dihitung dari ketinggian di atas home, **bukan** dari geometri world, jadi tidak akurat di atas lantai gua yang tidak rata |
-| **Baterai** | SITL | `BATT_MONITOR 4`; dengan Gazebo nilainya tetap 100% |
-| **Vision / ExtNav** | SITL (`sim:vicon`) | Hanya dengan `--gps-denied`: posisi, kecepatan, yaw 50 Hz + noise. Lihat bagian 8 |
-| **Kamera RGB-D RealSense D435** | Gazebo (`rgbd_camera`, render di GPU) | Di hidung drone (x = 0.11 m), menghadap lurus ke depan. 640×480 @ 30 Hz, HFOV 60° (fx = fy = 554.25), depth 0.1–10 m, noise σ 0.007. Topik Gazebo `d435/image`, `d435/depth_image`, `d435/points`, `d435/camera_info`; frame `d435_link` |
+| **IMU** (gyro + accelerometer) | Gazebo (`imu_sensor`, 1000 Hz) | ArduPilot sees 2 IMUs (`INS_GYR_ID`, `INS_GYR2_ID`) from the same data + SITL noise |
+| **Barometer** | SITL | 2 barometers (`BARO1_DEVID`, `BARO2_DEVID`) |
+| **Compass** | SITL | 3 magnetometers (`COMPASS_DEV_ID..3`) |
+| **GPS** | SITL | GPS1 at 5 Hz (`SIM_GPS1_HZ`). **Off** with `--gps-denied` (`GPS1_TYPE 0`) |
+| **Downward rangefinder** | SITL | `RNGFND1_TYPE 1`, facing down, max 50 m (from `gazebo-iris.parm`, for precision landing). Computed from the height above home, **not** from the world geometry, so it is wrong over the cave's uneven floor |
+| **Battery** | SITL | `BATT_MONITOR 4`; with Gazebo it stays at 100% |
+| **Vision / ExtNav** | SITL (`sim:vicon`) | Only with `--gps-denied`: position, velocity, yaw at 50 Hz + noise. See section 8 |
+| **RealSense D435 RGB-D camera** | Gazebo (`rgbd_camera`, rendered on the GPU) | On the drone's nose (x = 0.11 m), looking straight ahead. 640×480 @ 30 Hz, HFOV 60° (fx = fy = 554.25), depth 0.1–10 m, noise σ 0.007. Gazebo topics `d435/image`, `d435/depth_image`, `d435/points`, `d435/camera_info`; frame `d435_link` |
 
-World runway/warehouse memakai `iris_with_gimbal`: sensor yang sama kecuali kamera, diganti kamera
-gimbal 3 sumbu (640×480, HFOV 2.0 rad).
+The runway/warehouse worlds use `iris_with_gimbal`: the same sensors except the camera, which is a
+3-axis gimbal camera instead (640×480, HFOV 2.0 rad).
 
-## 8. Terbang tanpa GPS (`--gps-denied`)
+## 8. GPS-denied flight (`--gps-denied`)
 
-`params/gps_denied.parm` (sama dengan `copter-vicon.parm` di autotest ArduPilot, plus noise):
+`params/gps_denied.parm` (the same as `copter-vicon.parm` in ArduPilot's autotest, plus noise):
 
-| Parameter | Nilai | Arti |
+| Parameter | Value | Meaning |
 |---|---|---|
-| `GPS1_TYPE`, `SIM_GPS1_ENABLE` | 0 | tidak ada GPS |
-| `VISO_TYPE` | 1 | visual odometry lewat MAVLink |
-| `SERIAL5_PROTOCOL` | 2 | MAVLink di SERIAL5 (`sim:vicon`) |
-| `EK3_SRC1_POSXY/VELXY/POSZ/VELZ/YAW` | 6 | EKF3: semua dari External Navigation |
-| `SIM_VICON_P_SD` / `SIM_VICON_V_SD` | 0.01 m / 0.02 m/s | noise pengukuran vision |
+| `GPS1_TYPE`, `SIM_GPS1_ENABLE` | 0 | no GPS |
+| `VISO_TYPE` | 1 | visual odometry over MAVLink |
+| `SERIAL5_PROTOCOL` | 2 | MAVLink on SERIAL5 (`sim:vicon`) |
+| `EK3_SRC1_POSXY/VELXY/POSZ/VELZ/YAW` | 6 | EKF3: everything from External Navigation |
+| `SIM_VICON_P_SD` / `SIM_VICON_V_SD` | 0.01 m / 0.02 m/s | vision measurement noise |
 
-Simulator vision mengambil pose drone dari fisika Gazebo; ini pengganti VIO/SLAM sungguhan
-(T265, VOXL, RTAB-Map) tanpa drift. Tanpa GPS EKF tidak punya origin global, jadi
-`tools/set_ekf_origin.py` mengirim `SET_GPS_GLOBAL_ORIGIN` (posisi awal simulator) lewat TCP 5766
-sampai dikonfirmasi; setelah itu QGC menampilkan posisi drone dan mode GUIDED/LOITER bisa dipakai.
+The simulated vision system takes the drone's pose from the Gazebo physics; it stands in for a real
+VIO/SLAM system (T265, VOXL, RTAB-Map), without drift. Without GPS the EKF has no global origin, so
+`tools/set_ekf_origin.py` sends `SET_GPS_GLOBAL_ORIGIN` (the simulator's start position) over
+TCP 5766 until it is confirmed; after that QGC shows the drone's position and GUIDED/LOITER work.
 
-Uji kegagalan saat terbang (QGC → Parameters, MAVProxy `param set`, atau MCP `set_param`):
+Failure tests in flight (QGC → Parameters, MAVProxy `param set`, or MCP `set_param`):
 
-| Parameter | Efek |
+| Parameter | Effect |
 |---|---|
-| `SIM_VICON_GLIT_X` / `_Y` / `_Z` | posisi vision meloncat (m) |
-| `SIM_VICON_FAIL 1` | vision hilang |
-| `SIM_VICON_P_SD`, `SIM_VICON_V_SD` | noise lebih besar |
+| `SIM_VICON_GLIT_X` / `_Y` / `_Z` | the vision position jumps (m) |
+| `SIM_VICON_FAIL 1` | vision lost |
+| `SIM_VICON_P_SD`, `SIM_VICON_V_SD` | more noise |
 
-## 9. Kamera di ROS 2 / RViz2
+## 9. Camera in ROS 2 / RViz2
 
 ```bash
 ./run_ros_bridge.sh              # RGB + depth + RViz2
-./run_ros_bridge.sh --points     # + point cloud (berat, lihat bagian 11)
-./run_ros_bridge.sh --no-rviz    # bridge saja
+./run_ros_bridge.sh --points     # + point cloud (heavy, see section 11)
+./run_ros_bridge.sh --no-rviz    # bridge only
 ```
 
-| Topik ROS 2 | Tipe | Keterangan |
+| ROS 2 topic | Type | Notes |
 |---|---|---|
-| `/d435/image` | `sensor_msgs/Image` (rgb8) | warna 640×480 |
-| `/d435/depth_image` | `sensor_msgs/Image` (32FC1) | jarak dalam meter |
-| `/d435/camera_info` | `sensor_msgs/CameraInfo` | intrinsik |
-| `/d435/points` | `sensor_msgs/PointCloud2` | hanya dengan `--points` |
-| `/clock` | `rosgraph_msgs/Clock` | waktu simulasi (`use_sim_time`) |
+| `/d435/image` | `sensor_msgs/Image` (rgb8) | colour 640×480 |
+| `/d435/depth_image` | `sensor_msgs/Image` (32FC1) | distance in metres |
+| `/d435/camera_info` | `sensor_msgs/CameraInfo` | intrinsics |
+| `/d435/points` | `sensor_msgs/PointCloud2` | only with `--points` |
+| `/clock` | `rosgraph_msgs/Clock` | simulation time (`use_sim_time`) |
 
-Frame `d435_link`: x depan, y kiri, z atas. RViz2 (`ros/d435.rviz`) menampilkan panel RGB dan depth;
-centang "D435 points" bila memakai `--points`. Hanya butuh `/opt/ros/jazzy`, memakai RMW default.
+Frame `d435_link`: x forward, y left, z up. RViz2 (`ros/d435.rviz`) shows RGB and depth panels;
+tick "D435 points" when using `--points`. Only needs `/opt/ros/jazzy` and uses the default RMW.
 
-Topik dari terminal lain:
+Topics from another terminal:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
@@ -324,36 +328,36 @@ ros2 topic list
 ros2 run rqt_image_view rqt_image_view /d435/image
 ```
 
-## 10. Kontrol lewat Claude (MCP server `mavlink`)
+## 10. Control from Claude (MCP server `mavlink`)
 
-MCP server di `~/Projects/mavlink_mcp/server.py` (terdaftar di Claude Code, scope user), terhubung
-ke `tcp:127.0.0.1:5762` (env `MAVLINK_URL`). Tool: `status`, `takeoff`, `goto_local`,
-`goto_global`, `land`, `rtl`, `set_mode`, `arm`, `disarm`, `get_param`, `set_param`.
-Contoh permintaan: "takeoff 1.5 m lalu maju 8 m ke timur dan mendarat".
+An MCP server (`~/Projects/mavlink_mcp/server.py`, a separate project registered in Claude Code at
+user scope) connects to `tcp:127.0.0.1:5762` (env `MAVLINK_URL`). Tools: `status`, `takeoff`,
+`goto_local`, `goto_global`, `land`, `rtl`, `set_mode`, `arm`, `disarm`, `get_param`, `set_param`.
+Example request: "take off to 1.5 m, fly 8 m east and land".
 
-## 11. Performa: CPU vs GPU
+## 11. Performance: CPU vs GPU
 
-- **Fisika Gazebo selalu di CPU** (DART/Bullet tidak punya versi GPU). GPU NVIDIA dipakai untuk
-  rendering GUI, kamera D435 dan RViz2.
-- Gua: collision detector bawaan DART membuat mesh gua jadi bottleneck (~0.5× real time);
-  `cave_megacavern.sdf` memakai `<collision_detector>bullet</collision_detector>` (3–6× real time,
-  dibatasi 1×).
-- Point cloud (`--points`): ±300 ribu titik/frame dikemas di CPU dan dikirim lewat DDS; simulasi
-  bisa turun di bawah real time. RGB + depth saja tetap ±1× real time.
-- Cek real-time factor: `gz topic -e -t /stats -n 1 | grep real_time_factor`.
+- **Gazebo physics always runs on the CPU** (DART/Bullet have no GPU version). The NVIDIA GPU is
+  used for rendering the GUI, the D435 camera and RViz2.
+- Cave: DART's default collision detector makes the cave mesh the bottleneck (~0.5× real time);
+  `cave_megacavern.sdf` uses `<collision_detector>bullet</collision_detector>` (3–6× real time,
+  capped at 1×).
+- Point cloud (`--points`): ~300k points per frame are packed on the CPU and sent over DDS; the
+  simulation may drop below real time. RGB + depth alone stays at ~1× real time.
+- Check the real-time factor: `gz topic -e -t /stats -n 1 | grep real_time_factor`.
 
-## 12. Menambah world dan vehicle
+## 12. Adding worlds and vehicles
 
-### World baru
+### New world
 
-1. Salin template, mis. `ardupilot_gazebo/worlds/iris_runway.sdf` → `worlds/nama.sdf`.
-2. Ganti `<world name>` dan isinya. Pertahankan plugin Physics, Sensors (`ogre2`), Imu, NavSat,
-   `<spherical_coordinates>` dan `max_step_size` 0.001.
-3. Masukkan drone: `<include><uri>model://iris_with_d435</uri><pose>x y 0.195 0 0 yaw</pose></include>`
-   di lantai datar (kalau tidak, drone bisa terguling saat muncul).
-4. `./run_gazebo.sh nama.sdf`
+1. Copy a template, e.g. `ardupilot_gazebo/worlds/iris_runway.sdf` → `worlds/name.sdf`.
+2. Change `<world name>` and the contents. Keep the Physics, Sensors (`ogre2`), Imu and NavSat
+   plugins, `<spherical_coordinates>` and `max_step_size` 0.001.
+3. Add the drone: `<include><uri>model://iris_with_d435</uri><pose>x y 0.195 0 0 yaw</pose></include>`
+   on flat ground (otherwise it may tip over when it spawns).
+4. `./run_gazebo.sh name.sdf`
 
-World gua dibuat ulang dari sumbernya:
+Rebuilding the cave world from its source:
 
 ```bash
 gz fuel download -u "https://fuel.gazebosim.org/1.0/OpenRobotics/worlds/Finals Prize Round World 08"
@@ -362,46 +366,46 @@ python3 tools/convert_subt_world.py \
   worlds/cave_megacavern.sdf
 ```
 
-### Vehicle baru
+### New vehicle
 
-1. Salin template ke `models/nama/`: `ardupilot_gazebo/models/iris_with_ardupilot` (multicopter),
-   `zephyr_with_ardupilot` (pesawat), atau gabungkan seperti `models/iris_with_d435`
-   (`<include merge="true">` model dasar + sensor + `fixed` joint).
-2. Blok `<plugin name="ArduPilotPlugin">` di `model.sdf`:
-   - `fdm_port_in` 9002 (vehicle kedua 9012 + SITL `-I1`, dst.),
-   - `imuName` = sensor IMU model itu,
-   - satu `<control channel="N">` per motor/servo, urut sesuai output SERVO(N+1) ArduPilot.
-3. Frame SITL dan parameter:
+1. Copy a template to `models/name/`: `ardupilot_gazebo/models/iris_with_ardupilot` (multicopter),
+   `zephyr_with_ardupilot` (plane), or combine like `models/iris_with_d435`
+   (`<include merge="true">` of the base model + sensor + `fixed` joint).
+2. The `<plugin name="ArduPilotPlugin">` block in `model.sdf`:
+   - `fdm_port_in` 9002 (a second vehicle 9012 + SITL `-I1`, etc.),
+   - `imuName` = the model's IMU sensor,
+   - one `<control channel="N">` per motor/servo, in the order of ArduPilot's SERVO(N+1) outputs.
+3. SITL frame and parameters:
 
    ```bash
    ./run_sitl.sh --gazebo -v ArduPlane -f gazebo-zephyr
-   ./run_sitl.sh --gazebo --add-param-file=$HOME/Projects/ardupilot_sim/params/nama.parm
+   ./run_sitl.sh --gazebo --add-param-file=$PWD/params/name.parm
    ```
 
 ## 13. Troubleshooting
 
-| Gejala | Penyebab / solusi |
+| Symptom | Cause / fix |
 |---|---|
-| `Arm: Gyros inconsistent` beberapa detik setelah start | normal saat SITL baru jalan; tunggu ±15 detik lalu arm lagi |
-| `PrecLand: Failsafe Measures` saat mendarat | precision landing aktif (`gazebo-iris.parm`) tapi tidak ada target IR-Lock; aman diabaikan |
-| QGC tidak tersambung | QGC harus mendengarkan UDP 14550 (default). Comm link UDP 5760 tidak berguna (5760 bukan port SITL ini) |
-| `run_sitl.sh --gazebo` tidak jalan / `No JSON sensor message received` | Gazebo belum jalan atau world tidak punya drone dengan ArduPilotPlugin (port 9002) |
-| Port 9002 / 5762 sudah dipakai | simulasi lain masih jalan (mis. EGO-Planner): `./stop_sim.sh` atau `stop_ego_ardupilot.sh` |
-| Mode `--gps-denied` tidak bisa arm di GUIDED | tunggu `set_ekf_origin: EKF origin set` di terminal SITL; TCP 5766 harus bebas saat start (sambungkan Mission Planner setelahnya) |
-| MAVROS `connected: true` tapi topik posisi/IMU kosong | stream rate port 5763 diatur `params/sitl_ports.parm`; pastikan SITL dijalankan lewat `run_sitl.sh`, atau panggil `/mavros/set_stream_rate` |
-| World gagal dimuat (`Failed to load a world`) | lihat `[Err]` di output Gazebo; model Fuel bisa hilang/privat — lihat daftar yang dibuang di `tools/convert_subt_world.py` |
-| Simulasi lambat | lihat bagian 11; matikan `--points`, tutup GUI Gazebo bila tidak perlu |
+| `Arm: Gyros inconsistent` for a few seconds after start | normal right after SITL starts; wait ~15 s and arm again |
+| `PrecLand: Failsafe Measures` when landing | precision landing is enabled (`gazebo-iris.parm`) but there is no IR-Lock target; safe to ignore |
+| QGC doesn't connect | QGC must listen on UDP 14550 (its default). A UDP 5760 comm link is useless (5760 is not a port of this SITL) |
+| `run_sitl.sh --gazebo` doesn't start / `No JSON sensor message received` | Gazebo isn't running, or the world has no drone with the ArduPilotPlugin (port 9002) |
+| Port 9002 / 5762 already in use | another simulation is still running: `./stop_sim.sh` (or the other project's stop script) |
+| `--gps-denied` can't arm in GUIDED | wait for `set_ekf_origin: EKF origin set` in the SITL terminal; TCP 5766 must be free at start-up (connect Mission Planner afterwards) |
+| MAVROS `connected: true` but position/IMU topics are empty | the stream rates for port 5763 are set in `params/sitl_ports.parm`; make sure SITL was started with `run_sitl.sh`, or call `/mavros/set_stream_rate` |
+| A world fails to load (`Failed to load a world`) | check `[Err]` in the Gazebo output; Fuel models can disappear or become private — see the list of removed models in `tools/convert_subt_world.py` |
+| The simulation is slow | see section 11; drop `--points`, close the Gazebo GUI if not needed |
 
-## 14. Sumber dan lisensi
+## 14. Sources and licenses
 
 - `worlds/cave_megacavern.sdf`: "Finals Prize Round World 08", Open Robotics, CC BY 4.0
   (https://app.gazebosim.org/OpenRobotics/fuel/worlds/Finals%20Prize%20Round%20World%2008).
-  Diubah: elemen kompetisi, model yang tidak bisa diunduh, dan penanda Fiducial dibuang; sistem
-  ArduPilot, Bullet collision detector dan drone ditambahkan.
+  Changed: competition elements, models that can no longer be downloaded and the Fiducial markers
+  removed; ArduPilot systems, the Bullet collision detector and the drone added.
 - `models/realsense_d435`: "Intel RealSense D435", bmchale / Open Robotics, CC BY 4.0
-  (https://app.gazebosim.org/bmchale/fuel/models/Intel%20RealSense%20D435). Diubah: mesh diputar
-  90° (lensa aslinya menghadap -y), pose dan topik sensor.
-- `worlds/ego_forest_real.sdf`, `models/ego_forest_real_textures`: disalin dari
-  `ego_planner_ws/src/ego_ardupilot` (dibuat oleh `tools/gen_real_forest.py` di sana); drone diganti
+  (https://app.gazebosim.org/bmchale/fuel/models/Intel%20RealSense%20D435). Changed: mesh rotated
+  90° (the original's lenses face -y), sensor pose and topic.
+- `worlds/ego_forest_real.sdf`, `models/ego_forest_real_textures`: procedurally generated forest
+  (by `gen_real_forest.py` in the author's EGO-Planner workspace); drone replaced with
   `iris_with_d435`.
 - `ardupilot_gazebo`: https://github.com/ArduPilot/ardupilot_gazebo (LGPL-3.0).
