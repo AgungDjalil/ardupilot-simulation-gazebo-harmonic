@@ -1,12 +1,18 @@
 # ardupilot-simulation-gazebo-harmonic
 
-A simulation-only project: ArduCopter SITL with Gazebo Harmonic, cave and forest worlds for
-**GPS-denied** flight, a drone with an **Intel RealSense D435** camera, a camera bridge to
-**ROS 2 Jazzy / RViz2**, and control over **MAVLink** (QGroundControl, Mission Planner, MAVProxy,
-MAVROS, pymavlink, MCP).
+One simulation for every algorithm, as close to the real drone as possible: ArduCopter SITL with
+Gazebo Harmonic, the **real drone's replica** (Iris + **Intel RealSense D455** mounted as on the
+drone), worlds for **GPS-denied** flight, the D455 published in **ROS 2 Jazzy** exactly as the
+RealSense driver publishes it on the drone, and control over **MAVLink** (MAVROS, QGroundControl,
+Mission Planner, MAVProxy, pymavlink, MCP).
 
-It doesn't depend on any ROS workspace. The core simulation needs no ROS at all; ROS 2 is only
-used by `run_ros_bridge.sh`.
+**Principle: the simulation is the drone's hardware.** An algorithm sees what it sees on the drone
+(RealSense topics, frames and wall-clock stamps, with the D455's noise; MAVROS to an FC with the real
+FC's settings), so the same code runs on the drone unchanged afterwards. Testing a new algorithm =
+run this simulation and the algorithm; no simulation of its own.
+
+The core needs no ROS workspace (ROS 2 from `/opt/ros/jazzy` only for the sensor bridge). `ego_ws/`
+holds the simulation-only scripts for the drone's own onboard stack (`~/Projects/ego_planner_ws`).
 
 ---
 
@@ -15,17 +21,19 @@ used by `run_ros_bridge.sh`.
 1. [Folder layout](#1-folder-layout)
 2. [Requirements](#2-requirements)
 3. [Running](#3-running)
-4. [Available worlds](#4-available-worlds)
+4. [Worlds](#4-worlds)
 5. [Scripts and options](#5-scripts-and-options)
 6. [MAVLink: ports and how to connect](#6-mavlink-ports-and-how-to-connect)
-7. [Sensors on the drone](#7-sensors-on-the-drone)
-8. [GPS-denied flight (`--gps-denied`)](#8-gps-denied-flight---gps-denied)
-9. [Camera in ROS 2 / RViz2](#9-camera-in-ros-2--rviz2)
-10. [Control from Claude (MCP server `mavlink`)](#10-control-from-claude-mcp-server-mavlink)
-11. [Performance: CPU vs GPU](#11-performance-cpu-vs-gpu)
-12. [Adding worlds and vehicles](#12-adding-worlds-and-vehicles)
-13. [Troubleshooting](#13-troubleshooting)
-14. [Sources and licenses](#14-sources-and-licenses)
+7. [The drone and its sensors](#7-the-drone-and-its-sensors)
+8. [Navigation profiles and the real FC](#8-navigation-profiles-and-the-real-fc)
+9. [Sensors in ROS 2 (the simulated D455)](#9-sensors-in-ros-2-the-simulated-d455)
+10. [Testing an algorithm](#10-testing-an-algorithm)
+11. [The drone's onboard stack (`ego_ws/`)](#11-the-drones-onboard-stack-ego_ws)
+12. [Control from Claude (MCP server `mavlink`)](#12-control-from-claude-mcp-server-mavlink)
+13. [Performance](#13-performance)
+14. [Adding worlds](#14-adding-worlds)
+15. [Troubleshooting](#15-troubleshooting)
+16. [Sources and licenses](#16-sources-and-licenses)
 
 ---
 
@@ -33,43 +41,53 @@ used by `run_ros_bridge.sh`.
 
 ```
 ardupilot_sim/
-├── run_gazebo.sh          Gazebo (argument: world name)
-├── run_sitl.sh            ArduCopter SITL (--gazebo, --gps-denied)
-├── run_ros_bridge.sh      D435 camera -> ROS 2 + RViz2 (--points, --no-rviz)
+├── run_gazebo.sh          Gazebo + the drone (world, --pose, --wind, --infra, --headless)
+├── run_sitl.sh            ArduCopter SITL (--gazebo, --nav gps|vicon|extnav, --fc truf)
+├── run_ros_bridge.sh      the D455 (+ ground truth) in ROS 2 (--net local|lan, --ideal, --no-rviz)
 ├── stop_sim.sh            stop everything started by the scripts in this folder
-├── worlds/                this project's worlds
+├── worlds/                worlds, without a drone (spawn point: <frame name="ardupilot_sim_spawn">)
 │   ├── baylands.sdf           Baylands park (Sunnyvale, CA), GPS, with wind
 │   ├── cave_megacavern.sdf    cave (DARPA SubT Finals), GPS-denied
-│   └── ego_forest_real.sdf    forest, GPS-denied
-├── models/                this project's models
-│   ├── iris_with_d435/        Iris + ArduPilot + RealSense D435 (main drone, feels wind)
-│   ├── realsense_d435/        RealSense D435 camera
+│   ├── ego_forest_real.sdf    natural forest, GPS-denied
+│   ├── ego_forest.sdf         textured pillar forest
+│   └── ego_forest_plain.sdf   untextured pillar forest
+├── models/
+│   ├── truf_d455/             THE drone: Iris + ArduPilot + RealSense D455 (the real drone's replica)
 │   ├── baylands_park/         Fuel's Baylands model with a Harmonic-compatible tree material
-│   └── ego_forest_real_textures/  forest textures
+│   ├── ego_textures/, ego_forest_real_textures/   forest textures
 ├── params/
-│   ├── sitl_ports.parm    extra MAVLink ports + MAVROS stream rates (always loaded)
-│   └── gps_denied.parm    ArduPilot parameters for GPS-denied flight
+│   ├── sitl_ports.parm    extra MAVLink ports + default MAVROS stream rates (always loaded)
+│   ├── nav_vicon.parm     --nav vicon: position from SITL's simulated vision system
+│   ├── nav_extnav.parm    --nav extnav: position from the companion's visual odometry (MAVROS)
+│   └── fc_truf.parm       --fc truf: the real drone's FC settings
 ├── ros/
-│   ├── bridge.yaml        ros_gz_bridge: RGB, depth, camera_info, clock
-│   ├── bridge_points.yaml ros_gz_bridge: point cloud (optional)
-│   └── d435.rviz          RViz2 configuration
+│   ├── sim_camera.py      the simulated D455 (RealSense topics, noise, wall-clock stamps, /sim/truth)
+│   ├── world_map.py       ground-truth obstacle cloud /sim/world_cloud
+│   ├── d455.rviz          RViz2: colour, depth, ground truth
+│   └── cyclonedds_local.xml / cyclonedds_lan.xml   DDS for an algorithm on this laptop / on the Pi
 ├── tools/
+│   ├── make_world.py          world + drone + wind -> /tmp/ardupilot_sim (called by run_gazebo.sh)
+│   ├── check_params.py        are all parameters of a .parm file really set in SITL?
+│   ├── set_ekf_origin.py      EKF origin for --nav vicon (started by run_sitl.sh)
 │   ├── convert_subt_world.py  builds worlds/cave_megacavern.sdf from the Fuel world
-│   └── set_ekf_origin.py      sets the EKF origin (run automatically by --gps-denied)
+│   └── gen_real_forest.py, gen_textured_world.py   build the forest worlds
+├── ego_ws/                the drone's onboard stack on the simulation (section 11)
 └── ardupilot_gazebo/      git submodule: ArduPilot/ardupilot_gazebo + plugin build
                            (don't put your own files here)
 ```
 
-Gazebo searches `worlds/` and `models/` **before** `ardupilot_gazebo/worlds|models`.
+Gazebo searches `/tmp/ardupilot_sim/models` (the drone copy `run_gazebo.sh` writes), `worlds/`,
+`models/`, then `ardupilot_gazebo/worlds|models`.
 
 ## 2. Requirements
 
 | Component | Location / version |
 |---|---|
-| ArduPilot (SITL) | `~/Projects/ardupilot` (change with the `ARDUPILOT_DIR` env variable), venv `~/venv-ardupilot` |
+| ArduPilot (SITL) | `~/Projects/ardupilot` (change with `ARDUPILOT_DIR`), venv `~/venv-ardupilot`; tested with 4.7 |
 | Gazebo | Harmonic (`gz sim`, gz-sim 8) |
 | ArduPilot Gazebo plugin | `ardupilot_gazebo/build/libArduPilotPlugin.so` (build it, see below) |
-| ROS 2 (optional) | Jazzy in `/opt/ros/jazzy`, packages `ros_gz_bridge`, `rviz2` (and `mavros` for MAVROS) |
+| ROS 2 | Jazzy in `/opt/ros/jazzy`: `ros_gz_bridge`, `rviz2`, `tf2_ros`, Python `numpy` (sensor bridge); `mavros` for MAVROS |
+| DDS | CycloneDDS (`rmw_cyclonedds_cpp`), socket buffers: `/etc/sysctl.d/60-ros2-dds-buffers.conf` (rmem_max/wmem_max 64 MiB) |
 | GPU | NVIDIA through PRIME offload (automatic); `GZ_NVIDIA=0` for the integrated GPU |
 
 ### Clone and build
@@ -80,11 +98,6 @@ Gazebo searches `worlds/` and `models/` **before** `ardupilot_gazebo/worlds|mode
 git clone --recursive https://github.com/AgungDjalil/ardupilot-simulation-gazebo-harmonic.git ardupilot_sim
 cd ardupilot_sim
 # cloned without --recursive?  git submodule update --init
-```
-
-Build the plugin (once after cloning, and after updating the submodule):
-
-```bash
 cd ardupilot_gazebo
 GZ_VERSION=harmonic cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j
@@ -97,96 +110,70 @@ is opened.
 
 Each script in its own terminal, in this order. To stop: `./stop_sim.sh`.
 
-### a. Cave, GPS-denied, camera in RViz2
-
 ```bash
-./run_gazebo.sh cave_megacavern.sdf      # terminal 1, wait for the Gazebo window
-./run_sitl.sh --gazebo --gps-denied      # terminal 2
-./run_ros_bridge.sh                      # terminal 3 (optional): RViz2
+./run_gazebo.sh ego_forest_real.sdf             # 1. world + drone (wait for Gazebo)
+./run_sitl.sh --gazebo --nav extnav --fc truf   # 2. the FC, set up as the real one
+./run_ros_bridge.sh                             # 3. the D455 in ROS 2 (+ RViz2)
+# 4. the algorithm under test (section 10), e.g. the drone's own stack (section 11)
 ```
 
-### b. Forest, GPS-denied, camera in RViz2
+Other combinations:
 
 ```bash
-./run_gazebo.sh ego_forest_real.sdf
-./run_sitl.sh --gazebo --gps-denied
-./run_ros_bridge.sh
+./run_gazebo.sh cave_megacavern.sdf --infra             # cave, with the D455's infrared pair (VIO)
+./run_sitl.sh --gazebo --nav vicon                      # fly without an algorithm: perfect vision
+./run_gazebo.sh ego_forest.sdf --wind 4,90              # 4 m/s wind towards +y, gusts +-20 %
+./run_gazebo.sh baylands.sdf                            # with GPS (and the park's own 5 m/s wind):
+./run_sitl.sh --gazebo -l 37.4121731,-121.9988787,0,0   #   SITL home = the park
+./run_gazebo.sh                                         # ardupilot_gazebo's iris_runway.sdf
+./run_sitl.sh                                           # no Gazebo: SITL's built-in physics
 ```
 
-### c. Baylands park with GPS and wind
+QGroundControl connects by itself (UDP 14550). With `--nav vicon` wait for
+`set_ekf_origin: EKF origin set ...`; with `--nav extnav` the EKF has a position only once the
+algorithm sends its visual odometry (and sets the EKF origin).
+
+## 4. Worlds
+
+Worlds carry no drone: `run_gazebo.sh` (`tools/make_world.py`) adds `models/truf_d455` (model name
+`iris`) at the world's spawn point, `<frame name="ardupilot_sim_spawn">`, or at the pose of an iris a
+world brings itself (ardupilot_gazebo's worlds, which is removed). `--pose x,y,z,yaw` overrides it.
+
+| World | GPS | Spawn | Notes |
+|---|---|---|---|
+| `ego_forest_real.sdf` | `--nav extnav` / `vicon` | (0, 0) | Natural forest. Flight area x 0..26, y -8..8; the start and the survey points x ∈ {0, 26}, y ∈ {-8, -4, 0, 4, 8} (radius 1.6 m) are free of trees. |
+| `ego_forest.sdf` | `--nav extnav` / `vicon` | (0, 0) | Pillar forest, textured for visual odometry (pillars x 4..22, y -7..7). |
+| `ego_forest_plain.sdf` | `--nav extnav` / `vicon` | (0, 0) | The same pillars, untextured (visual odometry fails there). |
+| `cave_megacavern.sdf` | `--nav extnav` / `vicon` | (-12, 0) | Louisville Mega Cavern (SubT Finals World 08). Staging area ceiling ~3.8 m; the cave entrance ~8 m ahead (+x). |
+| `baylands.sdf` | yes, `-l 37.4121731,-121.9988787,0,0` | (0, 0) | Baylands Park, Sunnyvale CA. **Wind** 5 m/s + gusts. Open grass at the origin; trees south of y = -2. |
+| `iris_runway.sdf`, `iris_warehouse.sdf` | yes | the world's iris | From ardupilot_gazebo; their own iris is replaced by `truf_d455`. |
+
+All worlds except Baylands use SITL's default home (CMAC, -35.363262, 149.165237, 584 m), the same
+as their `<spherical_coordinates>`.
+
+### Wind
+
+`--wind speed[,direction[,gust]]`: `speed` m/s blowing towards `direction` degrees (0 = +x, 90 = +y),
+gusts of ±`gust` % (default 20) over 10 s, direction ±10° over 30 s, plus noise; WindEffects strength
+0.3 (measured on the hovering iris: ~2.6° tilt at 5 m/s, ~5° at 10 m/s). It replaces a world's own
+wind (`--wind 0`: calm Baylands). The drone feels it (`<enable_wind>`). Change it while running:
 
 ```bash
-./run_gazebo.sh baylands.sdf
-./run_sitl.sh --gazebo -l 37.4121731,-121.9988787,0,0   # SITL home = the park (lat,lon,alt,heading)
-./run_ros_bridge.sh                                     # optional
+gz topic -t /world/<world name>/wind -m gz.msgs.Wind -p 'linear_velocity: {x: 0, y: 10, z: 0}, enable_wind: true'
 ```
 
-The `-l` location must match the world (see [Wind](#wind-baylandssdf) and
-[Troubleshooting](#13-troubleshooting)); without it GPS and the QGC map show SITL's default home
-in Australia.
-
-### d. Runway with GPS (ardupilot_gazebo's own world)
-
-```bash
-./run_gazebo.sh                          # = iris_runway.sdf
-./run_sitl.sh --gazebo
-```
-
-### e. Without Gazebo (SITL's built-in physics, lightest)
-
-```bash
-./run_sitl.sh
-```
-
-Once SITL is running, **QGroundControl connects automatically** (UDP 14550). The drone is ready to
-fly when the EKF status is green; with `--gps-denied` wait for the line
-`set_ekf_origin: EKF origin set ...` in terminal 2.
-
-## 4. Available worlds
-
-| World | Drone | Camera | GPS | Notes |
-|---|---|---|---|---|
-| `baylands.sdf` | `iris_with_d435` | D435 | yes, `-l 37.4121731,-121.9988787,0,0` | Baylands Park, Sunnyvale CA (the outdoor world PX4 uses). **Wind** 5 m/s + gusts. Starts on open grass at the origin; trees begin south of y = -2. Ground ~0 m above sea level. |
-| `cave_megacavern.sdf` | `iris_with_d435` | D435 | use `--gps-denied` | Louisville Mega Cavern (SubT Finals World 08). Starts in the staging area (x = -12); the cave entrance is ~8 m ahead (+x). Staging area ceiling ~3.8 m. |
-| `ego_forest_real.sdf` | `iris_with_d435` | D435 | use `--gps-denied` | Natural forest. Starts at (0, 0). Flight area x 0..26, y -8..8; only the start point and the survey points x ∈ {0, 26}, y ∈ {-8, -4, 0, 4, 8} (radius 1.6 m) are guaranteed free of trees. |
-| `iris_runway.sdf` | `iris_with_gimbal` | gimbal camera 640×480 | yes | From ardupilot_gazebo. |
-| `iris_warehouse.sdf` | `iris_with_gimbal` | gimbal camera | yes | From ardupilot_gazebo. |
-| `zephyr_runway.sdf` | `zephyr_with_ardupilot` (plane) | – | yes | `./run_sitl.sh --gazebo -v ArduPlane -f gazebo-zephyr` (not tested in this project). |
-
-All worlds except Baylands use SITL's default home location (CMAC, -35.363262, 149.165237, 584 m),
-the same as the worlds' `<spherical_coordinates>`. Baylands needs `-l 37.4121731,-121.9988787,0,0`.
-
-There is no automatic obstacle avoidance: in the cave and the forest, fly slowly and in short legs.
-
-### Wind (`baylands.sdf`)
-
-| Setting | Value |
-|---|---|
-| Steady wind | 5 m/s towards +x (east, i.e. a west wind): `<wind><linear_velocity>5 0 0</linear_velocity></wind>` |
-| Gusts | speed ±20 % over 10 s + noise (σ 0.3 m/s), direction ±10° over 30 s + noise (σ 2°), vertical noise σ 0.1 m/s |
-| Strength | `<force_approximation_scaling_factor>0.3</force_approximation_scaling_factor>` (WindEffects plugin) |
-| Effect on the hovering Iris (measured) | ~2.6° tilt into the wind at 5 m/s (2.0–3.4° with gusts), ~5° at 10 m/s; position held within ~0.1 m |
-
-Change the wind while the simulation runs (x = east, y = north, m/s):
-
-```bash
-gz topic -t /world/baylands/wind -m gz.msgs.Wind -p 'linear_velocity: {x: 0, y: 10, z: 0}, enable_wind: true'   # 10 m/s towards north
-gz topic -t /world/baylands/wind -m gz.msgs.Wind -p 'linear_velocity: {x: 0, y: 0, z: 0}, enable_wind: true'    # calm
-```
-
-The gust and strength settings are in the WindEffects plugin of `worlds/baylands.sdf` (reload the
-world after editing). Only models with `<enable_wind>true</enable_wind>` feel the wind;
-`iris_with_d435` has it. To add wind to another world, copy the `<wind>` element and the
-WindEffects plugin. Note that SITL's own `SIM_WIND_*` parameters don't apply with Gazebo physics.
+SITL's own `SIM_WIND_*` parameters don't apply with Gazebo physics.
 
 ## 5. Scripts and options
 
-### `run_gazebo.sh [world.sdf]`
+### `run_gazebo.sh [world.sdf] [--pose x,y,z,yaw] [--wind s[,dir[,gust]]] [--infra] [--headless]`
 
 | | |
 |---|---|
 | Default world | `iris_runway.sdf` |
-| World/model search path | `worlds/`, `models/`, then `ardupilot_gazebo/worlds`, `ardupilot_gazebo/models` |
+| `--infra` | also render the D455's infrared stereo pair (costs GPU time) |
+| `--headless` | no GUI (server, off-screen rendering) |
+| Writes | `/tmp/ardupilot_sim/worlds/<world>.sdf`, `/tmp/ardupilot_sim/models/truf_d455/`, `/tmp/ardupilot_sim/current.json` (read by `run_ros_bridge.sh`) |
 | GPU | NVIDIA PRIME offload; `GZ_NVIDIA=0 ./run_gazebo.sh ...` for the integrated GPU |
 
 ### `run_sitl.sh [options] [sim_vehicle.py arguments]`
@@ -195,53 +182,55 @@ WindEffects plugin. Note that SITL's own `SIM_WIND_*` parameters don't apply wit
 |---|---|
 | (none) | ArduCopter with SITL's built-in physics (+ quad), no Gazebo |
 | `--gazebo` | `-f gazebo-iris --model JSON`: physics from Gazebo over UDP 9002 |
-| `--gps-denied` | GPS off, position from the simulated vision system (ExtNav) on SERIAL5, `params/gps_denied.parm`, EKF origin set automatically |
-| `-A "..."` | extra arguments for the SITL binary (merged, they don't replace the script's own) |
+| `--nav gps` | GPS navigation (default) |
+| `--nav vicon` (`--gps-denied`) | no GPS; position from SITL's simulated vision system, `params/nav_vicon.parm`, EKF origin set automatically |
+| `--nav extnav` | no GPS; position from the companion's visual odometry over MAVROS (TCP 5763), `params/nav_extnav.parm` |
+| `--fc truf` | the real drone's FC settings, `params/fc_truf.parm` (section 8) |
+| `-A "..."` | extra arguments for the SITL binary (merged with the script's own) |
 | (always) | MAVLink ports as in [section 6](#6-mavlink-ports-and-how-to-connect), `params/sitl_ports.parm` |
-| anything else | passed to `sim_vehicle.py`, e.g. `-v ArduPlane -f gazebo-zephyr`, `--add-param-file=...`, `-L location` |
+| anything else | passed to `sim_vehicle.py`, e.g. `--add-param-file=...`, `-l location` |
 
-Parameters always start clean (`-w`, eeprom wiped). SITL output: `tail -f /tmp/ArduCopter.log`.
+Parameters always start clean (`-w`). SITL output: `tail -f /tmp/ArduCopter.log`.
+**SITL ignores unknown parameter names without a word**, and ArduPilot renames parameters between
+versions; after changing a `.parm` file check it against the running SITL:
 
-### `run_ros_bridge.sh [--points] [--no-rviz]`
+```bash
+python3 tools/check_params.py params/fc_truf.parm      # ~/venv-ardupilot (pymavlink), TCP 5766
+```
 
-See [section 9](#9-camera-in-ros-2--rviz2).
+### `run_ros_bridge.sh [--net local|lan] [--domain N] [--ideal] [--no-rviz]`
+
+See [section 9](#9-sensors-in-ros-2-the-simulated-d455).
 
 ### `stop_sim.sh`
 
-Stops SITL, Gazebo, the bridge and RViz2 started by this folder's scripts. A Gazebo started by
-another project's launch file is left alone.
+Stops SITL, Gazebo, the sensor bridge and RViz2 started by this folder's scripts. The algorithm under
+test is stopped by its own script (e.g. `ego_ws/stop_onboard_local.sh`).
 
 ## 6. MAVLink: ports and how to connect
 
-Vehicle: **system ID 1, component ID 1**, MAVLink 2. Each application has its own port, so they can
-all be connected **at the same time**:
+Vehicle: **system ID 1, component ID 1**, MAVLink 2 (the real FC is 4: nothing meant for the
+simulation can command it). Each application has its own port, all usable **at the same time**:
 
 | Port | ArduPilot serial | For | How to connect |
 |---|---|---|---|
 | **UDP 14550** | SERIAL0 (SITL sends to `127.0.0.1:14550`) | **QGroundControl** | automatic, just open QGC |
 | **TCP 5762** | SERIAL1 | **MCP server `mavlink`** (Claude) | automatic (`MAVLINK_URL`) |
-| **TCP 5763** | SERIAL2 | **MAVROS** | `fcu_url:=tcp://127.0.0.1:5763` |
+| **TCP 5763** | SERIAL2 | **MAVROS** (the algorithm's FC link) | `fcu_url:=tcp://127.0.0.1:5763` (from the Pi: `tcp://192.168.50.1:5763`) |
 | **TCP 5766** | SERIAL6 | **Mission Planner** / MAVProxy / scripts | TCP, host `127.0.0.1`, port `5766` |
-| (internal) | SERIAL5 (`sim:vicon`) | simulated vision system for `--gps-denied` | – |
+| (internal) | SERIAL5 (`sim:vicon`) | simulated vision system for `--nav vicon` | – |
 
-- The TCP ports are servers on `0.0.0.0`: they can also be reached from another PC on the network
-  (`<this machine's IP>:5766`, e.g. Mission Planner on Windows), if the firewall allows it.
-- One TCP port = one client. A second client on the same port has to wait until the first
-  disconnects.
-- SITL doesn't wait for any connection to start; start the clients (QGC, MAVROS, Mission Planner)
-  after SITL is running.
-- With `--gps-denied`, `tools/set_ekf_origin.py` uses TCP 5766 for a few seconds at start-up (until
-  `EKF origin set`) and then releases it. Connect Mission Planner after that.
-- SERIAL6 and the MAVROS stream rates are set in `params/sitl_ports.parm` (always loaded by
-  `run_sitl.sh`).
+- The TCP ports are servers on `0.0.0.0`: reachable from the Pi or another PC on the network.
+- One TCP port = one client.
+- SITL doesn't wait for any connection to start.
+- With `--nav vicon`, `tools/set_ekf_origin.py` uses TCP 5766 for a few seconds at start-up and then
+  releases it. Connect Mission Planner after that.
+- Stream rates on the MAVROS port: `MAV3_*` in `params/sitl_ports.parm` (~20 Hz), with `--fc truf`
+  the real FC's (10 Hz position/IMU/attitude, 2 Hz status/battery). ArduPilot 4.7 names them `MAV3_*`
+  (4.6: `SR2_*`).
 
 Other internal ports (not MAVLink): UDP 9002 Gazebo ↔ SITL (JSON physics), UDP 5501 SITL RC input,
 UDP 9005 IR-Lock simulation.
-
-### QGroundControl
-
-Open QGC; the drone shows up by itself (QGC listens on UDP 14550 by default). Don't add a UDP 5760
-comm link — that is not a port of this simulation.
 
 ### MAVROS (ROS 2 Jazzy) — TCP 5763
 
@@ -250,25 +239,14 @@ source /opt/ros/jazzy/setup.bash
 ros2 launch mavros apm.launch fcu_url:=tcp://127.0.0.1:5763
 ```
 
-- `/mavros/state` → `connected: true`. The data streams on this port are preset
-  (`MAV3_*` in `params/sitl_ports.parm`): `/mavros/local_position/pose` and `/mavros/imu/data` at
-  ~20 Hz, `/mavros/battery` at 2 Hz.
-- Change the rate at runtime: `ros2 service call /mavros/set_stream_rate mavros_msgs/srv/StreamRate
-  "{stream_id: 0, message_rate: 20, on_off: true}"`.
-- GPS-denied (`--gps-denied`): the local position is still in `/mavros/local_position/*`;
-  `global_position` is derived from the EKF origin.
-- Don't connect MAVROS to 5762 (used by MCP) or 14550 (used by QGC).
+Change a stream rate at runtime: `ros2 service call /mavros/set_stream_rate
+mavros_msgs/srv/StreamRate "{stream_id: 0, message_rate: 20, on_off: true}"`. Don't connect MAVROS
+to 5762 (MCP) or 14550 (QGC).
 
 ### Mission Planner — TCP 5766
 
-On Linux Mission Planner runs with `mono`, e.g. from `~/MissionPlanner`:
-
-```bash
-cd ~/MissionPlanner && mono MissionPlanner.exe
-```
-
-In the top right corner pick **TCP** → **Connect** → host `127.0.0.1` → port `5766`.
-From another Windows PC: host = this machine's IP (`hostname -I`), port `5766`.
+`cd ~/MissionPlanner && mono MissionPlanner.exe`, top right **TCP** → **Connect** → `127.0.0.1` →
+`5766`. From another PC: host = this machine's IP.
 
 ### MAVProxy / pymavlink — TCP 5766
 
@@ -277,122 +255,185 @@ mavproxy.py --master tcp:127.0.0.1:5766          # from ~/venv-ardupilot
 python3 -c "from pymavlink import mavutil; m = mavutil.mavlink_connection('tcp:127.0.0.1:5766'); print(m.wait_heartbeat())"
 ```
 
-MAVProxy and Mission Planner share 5766; if you need both at once, forward from MAVProxy:
-`mavproxy.py --master tcp:127.0.0.1:5766 --out udp:127.0.0.1:14551` and connect Mission Planner over
-**UDP** port 14551.
+More ports: `./run_sitl.sh --gazebo -A "--serial7=udpclient:192.168.1.50:14551"` plus
+`SERIAL7_PROTOCOL 2` (in a `.parm` file or set and reboot).
 
-### Adding MAVLink outputs
+## 7. The drone and its sensors
 
-More ports can be added to SITL with `-A`, e.g. UDP to a companion computer on the network
-(SERIAL7; its MAVLink protocol must be enabled too):
-
-```bash
-./run_sitl.sh --gazebo -A "--serial7=udpclient:192.168.1.50:14551"
-# then set SERIAL7_PROTOCOL = 2 (QGC/MAVProxy/MCP set_param) and reboot,
-# or add "SERIAL7_PROTOCOL 2" to params/sitl_ports.parm
-```
-
-## 7. Sensors on the drone
-
-The main drone `models/iris_with_d435` = `iris_with_ardupilot` (ardupilot_gazebo) + RealSense D435.
-Its `model.sdf` is generated from `iris_with_ardupilot` with `iris_with_standoffs` merged in (so the
-model's `<enable_wind>` reaches the body links); the ArduPilot plugin and aerodynamics are unchanged.
-With `--model JSON`, Gazebo sends SITL the IMU data, position, velocity and attitude at every
-physics step (1 kHz). The other sensors are simulated by SITL from that physical state.
+`models/truf_d455`, the only drone: ardupilot_gazebo's `iris_with_ardupilot` with `iris_with_standoffs`
+merged in (so `<enable_wind>` reaches the body), plus the D455 and a ground-truth odometry publisher.
+The iris hovers at ~39% throttle, the real drone at 40%. With `--model JSON`, Gazebo sends SITL the
+IMU, position, velocity and attitude at every physics step (1 kHz).
 
 | Sensor | Simulated by | Details |
 |---|---|---|
-| **IMU** (gyro + accelerometer) | Gazebo (`imu_sensor`, 1000 Hz) | ArduPilot sees 2 IMUs (`INS_GYR_ID`, `INS_GYR2_ID`) from the same data + SITL noise |
-| **Barometer** | SITL | 2 barometers (`BARO1_DEVID`, `BARO2_DEVID`) |
-| **Compass** | SITL | 3 magnetometers (`COMPASS_DEV_ID..3`) |
-| **GPS** | SITL | GPS1 at 5 Hz (`SIM_GPS1_HZ`). **Off** with `--gps-denied` (`GPS1_TYPE 0`) |
-| **Downward rangefinder** | SITL | `RNGFND1_TYPE 1`, facing down, max 50 m (from `gazebo-iris.parm`, for precision landing). Computed from the height above home, **not** from the world geometry, so it is wrong over the cave's uneven floor |
-| **Battery** | SITL | `BATT_MONITOR 4`; with Gazebo it stays at 100% |
-| **Vision / ExtNav** | SITL (`sim:vicon`) | Only with `--gps-denied`: position, velocity, yaw at 50 Hz + noise. See section 8 |
-| **RealSense D435 RGB-D camera** | Gazebo (`rgbd_camera`, rendered on the GPU) | On the drone's nose (x = 0.11 m), looking straight ahead. 640×480 @ 30 Hz, HFOV 60° (fx = fy = 554.25), depth 0.1–10 m, noise σ 0.007. Gazebo topics `d435/image`, `d435/depth_image`, `d435/points`, `d435/camera_info`; frame `d435_link` |
+| **FC IMU** | Gazebo (`imu_sensor`, 1 kHz) | ArduPilot sees 2 IMUs from it + SITL noise |
+| **Barometer, compass** | SITL | 2 barometers, 3 magnetometers |
+| **GPS** | SITL | 5 Hz; **off** with `--nav vicon/extnav` |
+| **Downward rangefinder** | SITL | from `gazebo-iris.parm`; from the height above home, not the world geometry |
+| **Battery** | SITL | 100% unless `--fc truf` (4S 2.9 Ah, discharges, failsafes at 14.4 / 14.0 V) |
+| **Vision / ExtNav** | SITL (`sim:vicon`) or your algorithm | `--nav vicon` / `--nav extnav`, section 8 |
+| **RealSense D455** | Gazebo (rendered on the GPU) + `ros/sim_camera.py` | Mounted as on the real drone: pitched 22.9° down, rolled -2.5°, 2 cm above the FC; 15 cm forward (real 9 cm: the iris body reaches 14.5 cm). Colour + aligned depth 640×480 @ 15 Hz, HFOV 90°; infrared pair 848×480, HFOV 87°, baseline 95 mm (`--infra`); the D455 IMU from the FC IMU, rotated into the camera. Section 9 |
 
-The runway/warehouse worlds use `iris_with_gimbal`: the same sensors except the camera, which is a
-3-axis gimbal camera instead (640×480, HFOV 2.0 rad).
+The mount pose is set in one place, `models/truf_d455/model.sdf` (`d455_link`); `sim_camera.py`
+reads it, and the drone's own TF must match (the onboard stack passes `cam_x:=0.15` in simulation).
 
-## 8. GPS-denied flight (`--gps-denied`)
+## 8. Navigation profiles and the real FC
 
-`params/gps_denied.parm` (the same as `copter-vicon.parm` in ArduPilot's autotest, plus noise):
+### `--nav vicon` (`params/nav_vicon.parm`)
 
-| Parameter | Value | Meaning |
-|---|---|---|
-| `GPS1_TYPE`, `SIM_GPS1_ENABLE` | 0 | no GPS |
-| `VISO_TYPE` | 1 | visual odometry over MAVLink |
-| `SERIAL5_PROTOCOL` | 2 | MAVLink on SERIAL5 (`sim:vicon`) |
-| `EK3_SRC1_POSXY/VELXY/POSZ/VELZ/YAW` | 6 | EKF3: everything from External Navigation |
-| `SIM_VICON_P_SD` / `SIM_VICON_V_SD` | 0.01 m / 0.02 m/s | vision measurement noise |
+SITL's simulated vision system takes the pose from the Gazebo physics: GPS-denied flight without an
+algorithm (no drift). `GPS1_TYPE 0`, `VISO_TYPE 1`, `SERIAL5_PROTOCOL 2`, `EK3_SRC1_* 6`, noise
+`SIM_VICON_P_SD 0.01` / `SIM_VICON_V_SD 0.02`. `tools/set_ekf_origin.py` sets the EKF origin.
+Failure tests: `SIM_VICON_GLIT_X/Y/Z` (position jump, m), `SIM_VICON_FAIL 1` (vision lost).
 
-The simulated vision system takes the drone's pose from the Gazebo physics; it stands in for a real
-VIO/SLAM system (T265, VOXL, RTAB-Map), without drift. Without GPS the EKF has no global origin, so
-`tools/set_ekf_origin.py` sends `SET_GPS_GLOBAL_ORIGIN` (the simulator's start position) over
-TCP 5766 until it is confirmed; after that QGC shows the drone's position and GUIDED/LOITER work.
+### `--nav extnav` (`params/nav_extnav.parm`)
 
-Failure tests in flight (QGC → Parameters, MAVProxy `param set`, or MCP `set_param`):
+As the real drone: the position comes only from **your** visual odometry / SLAM, sent over MAVROS
+(`/mavros/vision_pose/pose` → `VISION_POSITION_ESTIMATE`). `GPS1_TYPE 0`, `VISO_TYPE 1`,
+`EK3_SRC1_POSXY/POSZ/YAW 6`, `VELXY/VELZ 0` (velocity derived), `VISO_DELAY_MS 80`. The algorithm must
+also set the EKF origin (`/mavros/global_position/set_gp_origin`), as the drone's `vo_to_mavros`
+does; without it the fence (with `--fc truf`) refuses to arm: "Fence requires position".
 
-| Parameter | Effect |
+### `--fc truf` (`params/fc_truf.parm`)
+
+The real drone's FC (MicoAir743v2, ArduCopter 4.6, quad X, 4S), copied from
+`ego_planner_ws/fc_params/after_20261019_1613.parm`, translated to ArduPilot 4.7 names where they
+changed:
+
+| Group | Settings |
 |---|---|
-| `SIM_VICON_GLIT_X` / `_Y` / `_Z` | the vision position jumps (m) |
-| `SIM_VICON_FAIL 1` | vision lost |
-| `SIM_VICON_P_SD`, `SIM_VICON_V_SD` | more noise |
+| Battery | 4S (`SIM_BATT_VOLTAGE 16.8`, `SIM_BATT_CAP_AH 2.9`, `MOT_BAT_VOLT_MAX/MIN 17.4/13.2`), low 14.4 V / critical 14.0 V → land, arming ≥ 14.7 V |
+| Speeds | `ATC_ANGLE_MAX 30`, `WP_SPD 20`, `WP_SPD_UP/DN 3`, `WP_ACC 3.5`, `LOIT_SPEED_MS 12.5`, `PILOT_SPD_UP 2.5`, `LAND_SPD_MS 0.5`, `RTL_ALT_M 33` |
+| Failsafes | `FS_EKF_ACTION 1` (land) at 0.8, `FS_GCS_ENABLE 1`, `FS_THR_ENABLE 0` |
+| Fence | circle + altitude + polygon (`FENCE_TYPE 7`), radius 100 m, 80 m high, RTL/land |
+| Arming | only GPS lock, board voltage and battery checked (FC `ARMING_CHECK 392` = 4.7 `ARMING_SKIPCHK 2096758`) |
+| Vision | `VISO_DELAY_MS 110` (measured on the drone's Pi) |
+| Telemetry | MAVROS port rates = the FC's port to the Pi |
 
-## 9. Camera in ROS 2 / RViz2
+Not copied: PIDs and filters (tuned for the real frame; the iris has its own dynamics), sensor
+calibrations, serial/RC setup, the system ID.
+
+## 9. Sensors in ROS 2 (the simulated D455)
 
 ```bash
-./run_ros_bridge.sh              # RGB + depth + RViz2
-./run_ros_bridge.sh --points     # + point cloud (heavy, see section 11)
-./run_ros_bridge.sh --no-rviz    # bridge only
+./run_ros_bridge.sh                 # algorithm on this laptop: loopback DDS, ROS domain 0, RViz2
+./run_ros_bridge.sh --net lan       # algorithm on the drone's Pi (LAN cable, 192.168.50.x)
+./run_ros_bridge.sh --ideal         # exact depth and IMU (no D455 noise / holes / bias)
+./run_ros_bridge.sh --no-rviz
 ```
+
+What realsense2_camera publishes on the drone (align_depth, unite_imu_method 2), with wall-clock
+stamps:
 
 | ROS 2 topic | Type | Notes |
 |---|---|---|
-| `/d435/image` | `sensor_msgs/Image` (rgb8) | colour 640×480 |
-| `/d435/depth_image` | `sensor_msgs/Image` (32FC1) | distance in metres |
-| `/d435/camera_info` | `sensor_msgs/CameraInfo` | intrinsics |
-| `/d435/points` | `sensor_msgs/PointCloud2` | only with `--points` |
-| `/clock` | `rosgraph_msgs/Clock` | simulation time (`use_sim_time`) |
+| `/camera/camera/color/image_raw`, `.../color/camera_info` | rgb8 640×480 @ 15 Hz | `camera_color_optical_frame` |
+| `/camera/camera/aligned_depth_to_color/image_raw`, `.../camera_info` | 16UC1 mm (0 = none) | same frame and stamp as the colour image |
+| `/camera/camera/imu` | `sensor_msgs/Imu` 200 Hz | gyro + accel, no orientation, `camera_imu_optical_frame` |
+| `/camera/camera/infra1/image_rect_raw`, `infra2/...`, `camera_info` | mono8 848×480 @ 15 Hz | with `run_gazebo.sh --infra`; infra2 `P[3] = -fx·0.095` |
+| TF `camera_link` → `camera_*_optical_frame` | static | `camera_link` itself is placed by the algorithm's TF (on the drone: its camera mount) |
+| `/sim/truth` (+ TF `sim_origin` → `sim_truth`) | `nav_msgs/Odometry` 15 Hz | **simulation only**: the true body pose relative to the spawn point (x forward at spawn) |
+| `/sim/world_cloud` | `PointCloud2` 1 Hz | **simulation only**: the world's obstacles (primitive shapes, not meshes) in `sim_origin` |
 
-Frame `d435_link`: x forward, y left, z up. RViz2 (`ros/d435.rviz`) shows RGB and depth panels;
-tick "D435 points" when using `--points`. Only needs `/opt/ros/jazzy` and uses the default RMW.
+The D455's errors (`ros/sim_camera.py` parameters; off with `--ideal`):
 
-Topics from another terminal:
+| | Value |
+|---|---|
+| Depth noise | σ = 0.0025 · z² (measured on the drone's D455: 7.6 cm at 5–6 m; simulated 22 mm at 3 m, 43 mm at 4 m) |
+| Depth holes | below 0.45 m, beyond 10 m, 2 % random dropout, both sides of depth jumps > 4 % (flying pixels) |
+| IMU | gyro 200 Hz, accel 63 Hz (held), noise 0.0035 rad/s / 0.021 m/s² per sample, constant bias per run (σ 0.2°/s, 0.05 m/s²), accel scale 0.899: the drone's uncalibrated D455 reads \|g\| = 8.82 (`accel_scale:=1.0` after `rs-imu-calibration`) |
+| Stamps | wall clock (sim time + an offset tracked from the IMU, per sim time): images keep their capture time, the render + network delay is camera latency (~50 ms) |
+
+RViz2 (`ros/d455.rviz`, fixed frame `sim_origin`): colour, depth, the true pose and the world's
+obstacles. The algorithm's terminals need the same DDS settings (section 10).
+
+## 10. Testing an algorithm
+
+1. Start the simulation (section 3) with the navigation profile the algorithm needs: `--nav extnav`
+   if it estimates the position itself (VIO/SLAM), `--nav vicon` if it only plans/controls,
+   `--nav gps` outdoors.
+2. In the algorithm's terminal, the same DDS as the bridge:
+
+   ```bash
+   export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp ROS_DOMAIN_ID=0
+   export CYCLONEDDS_URI=file://$HOME/Projects/ardupilot_sim/ros/cyclonedds_local.xml
+   ```
+
+3. The algorithm subscribes to the RealSense topics (`/camera/camera/...`) and talks to the FC with
+   MAVROS on `tcp://127.0.0.1:5763` (system ID 1). Nothing simulation-specific: on the drone it gets
+   the same topics from the real D455 and its FC over MAVROS.
+4. Measure it against `/sim/truth` and `/sim/world_cloud` (never feed them to the algorithm).
+
+## 11. The drone's onboard stack (`ego_ws/`)
+
+The drone's own stack (`~/Projects/ego_planner_ws`, launch `drone_onboard.launch.py`: RTAB-Map,
+MAVROS, `vo_to_mavros`, EGO-Planner + bridge) flies the simulation unchanged; only the camera driver
+is off (`camera:=false`), the FC is SITL (sysid 1, TCP 5763) and the camera is 15 cm forward
+(`cam_x:=0.15`).
 
 ```bash
-source /opt/ros/jazzy/setup.bash
-ros2 topic list
-ros2 run rqt_image_view rqt_image_view /d435/image
+./run_gazebo.sh ego_forest_real.sdf
+./run_sitl.sh --gazebo --nav extnav --fc truf
+# a) on the drone's Raspberry Pi (its CPU), LAN cable plugged in:
+./run_ros_bridge.sh --net lan
+ssh truf-agen@192.168.50.2 '~/drone/run_onboard.sh --sim'
+# b) or on this laptop:
+./run_ros_bridge.sh
+ego_ws/run_onboard_local.sh                      # stop: ego_ws/stop_onboard_local.sh
+# then exactly as with the real drone, from ~/Projects/ego_planner_ws:
+./drone_cmd.sh preflight                         # all OK before takeoff
+./drone_cmd.sh takeoff 1.0                       # forward 3 / turn 90 / land
+./run_drone_log.sh                               # start before takeoff: shows "SIM VO error"
+./run_drone_monitor.sh --rviz
 ```
 
-## 10. Control from Claude (MCP server `mavlink`)
+`drone_env.sh` (`drone_cmd`, `drone_log`, monitor) picks the link: local while
+`run_onboard_local.sh` runs, else the LAN cable, else WiFi.
 
-An MCP server (`~/Projects/mavlink_mcp/server.py`, a separate project registered in Claude Code at
-user scope) connects to `tcp:127.0.0.1:5762` (env `MAVLINK_URL`). Tools: `status`, `takeoff`,
-`goto_local`, `goto_global`, `land`, `rtl`, `set_mode`, `arm`, `disarm`, `get_param`, `set_param`.
-Example request: "take off to 1.5 m, fly 8 m east and land".
+```
+ego_ws/
+├── run_onboard_local.sh     the onboard stack on this laptop (loopback DDS)
+├── stop_onboard_local.sh    stop it (also nodes a failed launch left behind)
+├── export_rtabmap_map.sh    the stack's RTAB-Map database (save:=true) -> .ply
+├── build.sh                 colcon build of src/ on top of ego_planner_ws (build that one first)
+└── src/ego_ardupilot_sim/   survey: lawnmower waypoints through EGO-Planner, to map a whole world
+```
 
-## 11. Performance: CPU vs GPU
+Rules, as on the real drone:
+- **Restarting the onboard stack = rebooting the FC**: restart SITL first. The EKF keeps the previous
+  visual odometry frame (without a magnetometer the VO's yaw is arbitrary), and `preflight` fails
+  with "EKF = visual odometry frame: ... deg apart". `takeoff` doesn't wait for `preflight`.
+- **Restarting SITL pauses Gazebo** (lockstep): for the drone a camera dropout, EGO-Planner latches
+  "Depth Lost" for good. Restart the onboard stack after it.
+- Visual odometry silent for > 0.5 s in flight → the bridge lands (failsafe).
 
-- **Gazebo physics always runs on the CPU** (DART/Bullet have no GPU version). The NVIDIA GPU is
-  used for rendering the GUI, the D435 camera and RViz2.
-- Cave: DART's default collision detector makes the cave mesh the bottleneck (~0.5× real time);
-  `cave_megacavern.sdf` uses `<collision_detector>bullet</collision_detector>` (3–6× real time,
-  capped at 1×).
-- Point cloud (`--points`): ~300k points per frame are packed on the CPU and sent over DDS; the
-  simulation may drop below real time. RGB + depth alone stays at ~1× real time.
-- Check the real-time factor: `gz topic -e -t /stats -n 1 | grep real_time_factor`.
+`survey` (in the onboard stack's ROS domain 0, after takeoff):
+`ros2 run ego_ardupilot_sim survey` with `ego_ws/install` sourced and the DDS of section 10.
 
-## 12. Adding worlds and vehicles
+## 12. Control from Claude (MCP server `mavlink`)
 
-### New world
+An MCP server (`~/Projects/mavlink_mcp/server.py`, registered in Claude Code at user scope) connects
+to `tcp:127.0.0.1:5762` (env `MAVLINK_URL`). Tools: `status`, `takeoff`, `goto_local`, `goto_global`,
+`land`, `rtl`, `set_mode`, `arm`, `disarm`, `get_param`, `set_param`. For the simulation only.
+
+## 13. Performance
+
+- Gazebo physics runs on the CPU; the NVIDIA GPU renders the GUI, the D455 and RViz2.
+- **The drone's timing is only realistic at real time (RTF ≈ 1)**: the FC (SITL) runs on sim time, the
+  companion on the wall clock. Check: `gz topic -e -t /stats -n 1 | grep real_time_factor`. Other heavy
+  programs on the laptop (e.g. a VIO benchmark) push it below 1; `--headless` and no `--infra` help.
+- The bridge sends raw images (colour 0.9 MB + depth 0.6 MB per frame, to each reader): ~55 MB/s to
+  the Pi over the 1 Gbit/s cable.
+- The cave uses the Bullet collision detector (DART's default made the cave mesh ~0.5× real time).
+
+## 14. Adding worlds
 
 1. Copy a template, e.g. `ardupilot_gazebo/worlds/iris_runway.sdf` → `worlds/name.sdf`.
 2. Change `<world name>` and the contents. Keep the Physics, Sensors (`ogre2`), Imu and NavSat
-   plugins, `<spherical_coordinates>` and `max_step_size` 0.001.
-3. Add the drone: `<include><uri>model://iris_with_d435</uri><pose>x y 0.195 0 0 yaw</pose></include>`
-   on flat ground (otherwise it may tip over when it spawns).
+   plugins, `<spherical_coordinates>` and `max_step_size` 0.001. Remove its drone.
+3. Spawn point on flat ground (else the drone may tip over):
+   `<frame name="ardupilot_sim_spawn"><pose degrees="true">x y 0.195 0 0 yaw</pose></frame>`.
 4. `./run_gazebo.sh name.sdf`
 
 Rebuilding the cave world from its source:
@@ -404,53 +445,38 @@ python3 tools/convert_subt_world.py \
   worlds/cave_megacavern.sdf
 ```
 
-### New vehicle
+The forests: `python3 tools/gen_textured_world.py` (ego_forest.sdf from ego_forest_plain.sdf),
+`python3 tools/gen_real_forest.py` (ego_forest_real.sdf).
 
-1. Copy a template to `models/name/`: `ardupilot_gazebo/models/iris_with_ardupilot` (multicopter),
-   `zephyr_with_ardupilot` (plane), or combine like `models/iris_with_d435`
-   (`<include merge="true">` of the base model + sensor + `fixed` joint).
-2. The `<plugin name="ArduPilotPlugin">` block in `model.sdf`:
-   - `fdm_port_in` 9002 (a second vehicle 9012 + SITL `-I1`, etc.),
-   - `imuName` = the model's IMU sensor,
-   - one `<control channel="N">` per motor/servo, in the order of ArduPilot's SERVO(N+1) outputs.
-3. SITL frame and parameters:
-
-   ```bash
-   ./run_sitl.sh --gazebo -v ArduPlane -f gazebo-zephyr
-   ./run_sitl.sh --gazebo --add-param-file=$PWD/params/name.parm
-   ```
-
-## 13. Troubleshooting
+## 15. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
-| Takeoff fails (`MAV_RESULT_FAILED`) with `Terrain: clamping offset ...` | SITL's home altitude doesn't match the ground: the simulated rangefinder then reads tens of metres on the ground and ArduCopter refuses to "take off downwards". For Baylands use `-l 37.4121731,-121.9988787,0,0` (altitude 0) |
-| `Arm: Gyros inconsistent` for a few seconds after start | normal right after SITL starts; wait ~15 s and arm again |
-| `PrecLand: Failsafe Measures` when landing | precision landing is enabled (`gazebo-iris.parm`) but there is no IR-Lock target; safe to ignore |
-| QGC doesn't connect | QGC must listen on UDP 14550 (its default). A UDP 5760 comm link is useless (5760 is not a port of this SITL) |
-| `run_sitl.sh --gazebo` doesn't start / `No JSON sensor message received` | Gazebo isn't running, or the world has no drone with the ArduPilotPlugin (port 9002) |
-| Port 9002 / 5762 already in use | another simulation is still running: `./stop_sim.sh` (or the other project's stop script) |
-| `--gps-denied` can't arm in GUIDED | wait for `set_ekf_origin: EKF origin set` in the SITL terminal; TCP 5766 must be free at start-up (connect Mission Planner afterwards) |
-| MAVROS `connected: true` but position/IMU topics are empty | the stream rates for port 5763 are set in `params/sitl_ports.parm`; make sure SITL was started with `run_sitl.sh`, or call `/mavros/set_stream_rate` |
-| A world fails to load (`Failed to load a world`) | check `[Err]` in the Gazebo output; Fuel models can disappear or become private — see the list of removed models in `tools/convert_subt_world.py` |
-| The simulation is slow | see section 11; drop `--points`, close the Gazebo GUI if not needed |
+| A profile's parameter seems to do nothing | unknown name, ignored silently (ArduPilot renamed it): `python3 tools/check_params.py params/*.parm` |
+| `Arm: Fence requires position` | no EKF origin: with `--nav extnav` the algorithm must send it (`set_gp_origin`) |
+| `Crash: Disarming: AngErr=...` right after arming | the drone tipped over in Gazebo (e.g. landed on a log): restart Gazebo (`./stop_sim.sh`) |
+| `preflight`: EKF and visual odometry frames degrees apart | the onboard stack was restarted without SITL: restart SITL, then the stack |
+| EGO-Planner "Depth Lost! EMERGENCY_STOP" for good | the camera stalled (SITL restarted, RTF far below 1): restart the onboard stack |
+| Depth all zeros / Gazebo depth `-inf` | something in front of the camera within 0.1 m (a camera inside the iris body or its own housing) |
+| Takeoff fails with `Terrain: clamping offset ...` | SITL's home altitude doesn't match the ground: Baylands needs `-l 37.4121731,-121.9988787,0,0` |
+| `Arm: Gyros inconsistent` for a few seconds after start | normal right after SITL starts; wait ~15 s |
+| QGC doesn't connect | QGC must listen on UDP 14550 (its default) |
+| `No JSON sensor message received` | Gazebo isn't running (start `run_gazebo.sh` first) |
+| Port 9002 / 5763 already in use | another simulation is still running: `./stop_sim.sh` |
+| MAVROS `connected: true` but position/IMU empty | stream rates on 5763 come from `sitl_ports.parm` / `fc_truf.parm`: start SITL with `run_sitl.sh` |
+| The algorithm sees no camera topics | different DDS settings than `run_ros_bridge.sh` (domain, `CYCLONEDDS_URI`, section 10) |
 
-## 14. Sources and licenses
+## 16. Sources and licenses
 
 - `worlds/baylands.sdf`, `models/baylands_park`: "Baylands" model by Open Robotics, CC BY 4.0
   (https://app.gazebosim.org/OpenRobotics/fuel/models/Baylands, version 3). The meshes and textures
-  are loaded from Fuel; the wrapper only replaces the trees' Ogre 1 material script (black trees in
-  Gazebo Harmonic) with a PBR material using the same texture.
-- `models/iris_with_d435/model.sdf`: generated from ardupilot_gazebo's
-  `models/iris_with_ardupilot/model.sdf` (LGPL-3.0).
+  are loaded from Fuel; the wrapper only replaces the trees' Ogre 1 material script with a PBR material.
+- `models/truf_d455/model.sdf`: generated from ardupilot_gazebo's `models/iris_with_ardupilot/model.sdf`
+  (LGPL-3.0).
 - `worlds/cave_megacavern.sdf`: "Finals Prize Round World 08", Open Robotics, CC BY 4.0
   (https://app.gazebosim.org/OpenRobotics/fuel/worlds/Finals%20Prize%20Round%20World%2008).
   Changed: competition elements, models that can no longer be downloaded and the Fiducial markers
-  removed; ArduPilot systems, the Bullet collision detector and the drone added.
-- `models/realsense_d435`: "Intel RealSense D435", bmchale / Open Robotics, CC BY 4.0
-  (https://app.gazebosim.org/bmchale/fuel/models/Intel%20RealSense%20D435). Changed: mesh rotated
-  90° (the original's lenses face -y), sensor pose and topic.
-- `worlds/ego_forest_real.sdf`, `models/ego_forest_real_textures`: procedurally generated forest
-  (by `gen_real_forest.py` in the author's EGO-Planner workspace); drone replaced with
-  `iris_with_d435`.
+  removed; ArduPilot systems, the Bullet collision detector and the spawn point added.
+- `worlds/ego_forest*.sdf`, `models/ego_textures`, `models/ego_forest_real_textures`: procedurally
+  generated (`tools/gen_*.py`).
 - `ardupilot_gazebo`: https://github.com/ArduPilot/ardupilot_gazebo (LGPL-3.0).

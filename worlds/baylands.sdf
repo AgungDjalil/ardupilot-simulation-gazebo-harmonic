@@ -24,7 +24,7 @@
     <plugin filename="gz-sim-navsat-system" name="gz::sim::systems::NavSat" />
 
     <!-- Wind: steady 5 m/s blowing towards +x (east, i.e. a west wind) plus gusts. Only models
-         with <enable_wind>true</enable_wind> (e.g. iris_with_d435) feel it. Change it at runtime:
+         with <enable_wind>true</enable_wind> (e.g. truf_d455) feel it. Change it at runtime:
            gz topic -t /world/baylands/wind -m gz.msgs.Wind \
              -p 'linear_velocity: {x: 8, y: 0, z: 0}, enable_wind: true' -->
     <wind>
@@ -96,12 +96,11 @@
       <name>baylands</name>
     </include>
 
-    <!-- Open grass at the origin (ground z ~ -0.08 m, ~5 deg slope; trees start south of y = -2).
-         z = ground + Iris' standing height (0.195). -->
-    <include>
-      <uri>model://iris_with_d435</uri>
-      <name>iris</name>
-      <pose>0 0 0.12 0 0 0</pose>
-    </include>
+    <!-- The drone (models/truf_d455, model name "iris") is added by run_gazebo.sh at this spawn
+         point: open grass at the origin (ground z ~ -0.08 m, ~5 deg slope; trees
+         start south of y = -2), z = ground + Iris' standing height (0.195). -->
+    <frame name="ardupilot_sim_spawn">
+      <pose degrees="true">0 0 0.12 0 0 0</pose>
+    </frame>
   </world>
 </sdf>

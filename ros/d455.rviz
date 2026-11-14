@@ -13,56 +13,79 @@ Visualization Manager:
       Name: Grid
       Enabled: true
       Cell Size: 1
-      Plane Cell Count: 20
+      Plane Cell Count: 40
       Reference Frame: <Fixed Frame>
       Color: 160; 160; 164
       Alpha: 0.3
-    - Class: rviz_default_plugins/Axes
-      Name: D435 frame
-      Enabled: true
-      Reference Frame: d435_link
-      Length: 0.3
-      Radius: 0.02
     - Class: rviz_default_plugins/PointCloud2
-      Name: D435 points
-      Enabled: false
+      Name: World obstacles (ground truth)
+      Enabled: true
       Topic:
-        Value: /d435/points
+        Value: /sim/world_cloud
+        Depth: 1
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Style: Points
+      Size (Pixels): 2
+      Color Transformer: AxisColor
+      Axis: Z
+      Decay Time: 0
+      Queue Size: 2
+    - Class: rviz_default_plugins/Odometry
+      Name: Drone (ground truth)
+      Enabled: true
+      Topic:
+        Value: /sim/truth
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
-        Reliability Policy: Best Effort
-      Style: Points
-      Size (Pixels): 2
-      Color Transformer: RGB8
-      Decay Time: 0
-      Queue Size: 10
+        Reliability Policy: Reliable
+      Keep: 300
+      Position Tolerance: 0.1
+      Angle Tolerance: 0.1
+      Shape:
+        Value: Axes
+        Axes Length: 0.3
+        Axes Radius: 0.02
+      Covariance:
+        Value: false
     - Class: rviz_default_plugins/Image
-      Name: D435 RGB
+      Name: D455 colour
       Enabled: true
       Topic:
-        Value: /d435/image
-        Depth: 5
+        Value: /camera/camera/color/image_raw
+        Depth: 2
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Best Effort
       Normalize Range: true
     - Class: rviz_default_plugins/Image
-      Name: D435 depth
+      Name: D455 depth (aligned, mm)
       Enabled: true
       Topic:
-        Value: /d435/depth_image
-        Depth: 5
+        Value: /camera/camera/aligned_depth_to_color/image_raw
+        Depth: 2
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Best Effort
       Normalize Range: false
       Min Value: 0
-      Max Value: 10
+      Max Value: 8000
+    - Class: rviz_default_plugins/Image
+      Name: D455 infra1 (--infra)
+      Enabled: false
+      Topic:
+        Value: /camera/camera/infra1/image_rect_raw
+        Depth: 2
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+      Normalize Range: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: d435_link
+    Fixed Frame: sim_origin
     Frame Rate: 30
   Name: root
   Tools:
@@ -73,13 +96,13 @@ Visualization Manager:
     Current:
       Class: rviz_default_plugins/Orbit
       Name: Current View
-      Target Frame: <Fixed Frame>
+      Target Frame: sim_truth
       Focal Point:
-        X: 3
+        X: 0
         Y: 0
         Z: 0
-      Distance: 8
-      Pitch: 0.5
+      Distance: 10
+      Pitch: 0.6
       Yaw: 3.14
       Near Clip Distance: 0.01
 Window Geometry:

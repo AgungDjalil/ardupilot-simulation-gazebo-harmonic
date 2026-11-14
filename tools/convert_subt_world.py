@@ -31,8 +31,6 @@ SYSTEMS = [
 # entrance (+x). Outside it the cave floor is uneven and the Iris tips over on spawn.
 # z = Iris' standing height, as in iris_runway.sdf.
 VEHICLE_POSE = '-12 0 0.195 0 0 0'
-# Iris + forward RealSense D435 (models/iris_with_d435).
-VEHICLE_MODEL = 'model://iris_with_d435'
 # Same as SITL's default home (CMAC), so the EKF origin and Gazebo agree.
 HOME = {'latitude_deg': '-35.363262', 'longitude_deg': '149.165237', 'elevation': '584',
         'heading_deg': '0', 'surface_model': 'EARTH_WGS84'}
@@ -83,10 +81,9 @@ def main(src, dst):
     for k, v in HOME.items():
         sub(coords, k, v)
 
-    vehicle = sub(world, 'include')
-    sub(vehicle, 'uri', VEHICLE_MODEL)
-    sub(vehicle, 'name', 'iris')
-    sub(vehicle, 'pose', VEHICLE_POSE)
+    # Spawn point of the drone, which run_gazebo.sh adds (models/truf_d455).
+    spawn = sub(world, 'frame', name='ardupilot_sim_spawn')
+    sub(spawn, 'pose', VEHICLE_POSE)
 
     ET.indent(tree, '  ')
     header = ('<?xml version="1.0" ?>\n'

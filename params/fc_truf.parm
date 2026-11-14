@@ -1,0 +1,63 @@
+# The real drone's flight controller (MicoAir743v2, ArduCopter 4.6, quad X, 4S), where SITL differs:
+# the settings that shape how the drone behaves for the algorithms on it. Copied from
+# ego_planner_ws/fc_params/after_20261019_1613.parm. Loaded by: ./run_sitl.sh ... --fc truf
+#
+# Not copied: rate/attitude PIDs and filters (tuned for the real frame, the simulated iris has its
+# own dynamics: it hovers at ~39% throttle like the real drone's 40%), sensor calibrations,
+# serial / RC setup, and SYSID_THISMAV (the real FC is 4; SITL stays 1, so nothing meant for the
+# simulation can ever command the real FC).
+
+# Battery: 4S 2900 mAh (SITL simulates the voltage sag and discharge)
+SIM_BATT_VOLTAGE 16.8
+SIM_BATT_CAP_AH  2.9
+BATT_CAPACITY    2900
+MOT_BAT_VOLT_MAX 17.4
+MOT_BAT_VOLT_MIN 13.2
+BATT_ARM_VOLT    14.7
+BATT_LOW_VOLT    14.4
+BATT_CRT_VOLT    14
+BATT_FS_LOW_ACT  2
+BATT_FS_CRT_ACT  2
+MOT_THST_HOVER   0.40
+
+# Speeds and limits. ArduPilot 4.7 (this SITL) renamed these to SI units; the FC's 4.6 names and
+# values are on the right. SITL ignores unknown names silently: check with tools/check_params.py.
+ATC_ANGLE_MAX    30       # ANGLE_MAX 3000 (cdeg)
+WP_SPD           20       # WPNAV_SPEED 2000 (cm/s)
+WP_SPD_UP        3        # WPNAV_SPEED_UP 300
+WP_SPD_DN        3        # WPNAV_SPEED_DN 300
+WP_ACC           3.5      # WPNAV_ACCEL 350 (cm/s/s)
+LOIT_SPEED_MS    12.5     # LOIT_SPEED 1250
+PILOT_SPD_UP     2.5      # PILOT_SPEED_UP 250
+PILOT_SPD_DN     0        # PILOT_SPEED_DN 0 (= PILOT_SPD_UP)
+LAND_SPD_MS      0.5      # LAND_SPEED 50
+RTL_ALT_M        33       # RTL_ALT 3300 (cm)
+
+# Failsafes and fence
+FS_EKF_ACTION    1
+FS_EKF_THRESH    0.8
+FS_GCS_ENABLE    1
+FS_THR_ENABLE    0
+FENCE_ENABLE     1
+FENCE_TYPE       7
+FENCE_ACTION     1
+FENCE_RADIUS     100
+FENCE_ALT_MAX    80
+# The FC (4.6) has ARMING_CHECK 392: only GPS lock, board voltage and battery are checked.
+# ArduPilot 4.7 (this SITL) replaced it by the inverse, ARMING_SKIPCHK (checks to skip); same
+# conversion as AP_Arming::init(): (~392) & 0x1FFFFE. Unknown names are ignored silently.
+ARMING_SKIPCHK   2096758
+
+# Vision: camera -> FC latency measured on the real drone's Pi
+VISO_DELAY_MS    110
+
+# Telemetry to the companion computer on the MAVROS port (TCP 5763 = SERIAL2 = MAVLink channel 2:
+# MAV3_*), as the real FC's port to the Pi (SR2_* there; ArduPilot 4.7 renamed SRn_* to MAV<n+1>_*).
+# Overrides sitl_ports.parm's faster rates.
+MAV3_EXT_STAT    2
+MAV3_EXTRA1      10
+MAV3_EXTRA2      2
+MAV3_EXTRA3      2
+MAV3_POSITION    10
+MAV3_RAW_SENS    10
+MAV3_RC_CHAN     2

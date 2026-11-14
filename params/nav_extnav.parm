@@ -1,0 +1,29 @@
+# GPS-denied flight on the position of a companion computer's visual odometry / SLAM (e.g. the
+# real drone's Raspberry Pi: RTAB-Map -> MAVROS vision_pose -> VISION_POSITION_ESTIMATE), sent
+# over MAVROS (TCP 5763), as on the real drone. Loaded by: ./run_sitl.sh --gazebo --nav extnav
+# Unlike --nav vicon nothing in SITL produces the position: without the companion the EKF has none,
+# and the companion also sets the EKF origin (the real drone's vo_to_mavros does).
+# Same EKF setup as the real FC (ego_planner_ws/fc_params/CHANGES.md).
+
+# Fly on EKF3. SITL builds default to AHRS_EKF_TYPE 10 (the simulator's perfect state), which
+# would ignore the EKF -- and with it the visual odometry -- entirely.
+AHRS_EKF_TYPE    3
+EK2_ENABLE       0
+EK3_ENABLE       1
+
+# No GPS at all
+GPS1_TYPE        0
+SIM_GPS1_ENABLE  0
+
+# Visual odometry over MAVLink (from MAVROS)
+VISO_TYPE        1
+# Image -> visual odometry -> MAVROS latency (ms). The real FC: 110 (fc_truf.parm sets it).
+VISO_DELAY_MS    80
+
+# EKF3 source set 1: position and yaw from ExtNav, velocity derived (VISION_POSITION_ESTIMATE has
+# none), height from ExtNav too, so the EKF frame is the visual odometry's frame.
+EK3_SRC1_POSXY   6
+EK3_SRC1_VELXY   0
+EK3_SRC1_POSZ    6
+EK3_SRC1_VELZ    0
+EK3_SRC1_YAW     6

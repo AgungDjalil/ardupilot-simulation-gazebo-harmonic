@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CycloneDDS for the simulation's sensors when the algorithm runs on the drone's Raspberry Pi
+  (run_ros_bridge.sh net lan, Pi: ~/drone/run_onboard.sh with sim): over the LAN cable, laptop
+  enp193s0 192.168.50.1, Pi eth0 192.168.50.2 (NetworkManager "LAN-Share" with a DHCP reservation).
+  The same settings as ego_planner_ws's config/cyclonedds_lan.xml: keep both alike.
+
+  - The Pi's onboard ROS domain 0 (run_ros_bridge.sh sets it), its pi/cyclonedds_sim.xml.
+  - Raw D455 images to each reader on the Pi (~55 MB/s on the 1 Gbit/s link).
+  - LAN interface only, unicast to the two machines (multicast off); this laptop is a peer too.
+    Needs /etc/sysctl.d/60-ros2-dds-buffers.conf (rmem_max/wmem_max 64 MiB).
+-->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface name="enp193s0"/>
+      </Interfaces>
+      <AllowMulticast>false</AllowMulticast>
+    </General>
+    <Discovery>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <MaxAutoParticipantIndex>120</MaxAutoParticipantIndex>
+      <Peers>
+        <Peer address="192.168.50.1"/>
+        <Peer address="192.168.50.2"/>
+      </Peers>
+    </Discovery>
+    <Internal>
+      <!-- Must stay <= net.core.rmem_max. -->
+      <SocketReceiveBufferSize min="16MB" max="64MB"/>
+      <SocketSendBufferSize min="16MB" max="64MB"/>
+      <Watermarks>
+        <WhcHigh>8MB</WhcHigh>
+      </Watermarks>
+    </Internal>
+  </Domain>
+</CycloneDDS>

@@ -1,7 +1,0 @@
-# ros_gz_bridge: D435 point cloud (heavy: ~300k points per frame are packed on the CPU).
-# Only used with ./run_ros_bridge.sh --points
-- ros_topic_name: /d435/points
-  gz_topic_name: /d435/points
-  ros_type_name: sensor_msgs/msg/PointCloud2
-  gz_type_name: gz.msgs.PointCloudPacked
-  direction: GZ_TO_ROS

@@ -1,7 +1,8 @@
 # GPS-denied flight: EKF3 uses External Navigation (position, velocity, yaw) from SITL's simulated
 # vision system (sim:vicon on SERIAL5, VISION_POSITION_ESTIMATE + VISION_SPEED_ESTIMATE).
 # The pose comes from the Gazebo physics, so this stands in for a real VIO/SLAM system (e.g. T265,
-# VOXL, RTAB-Map). Loaded by: ./run_sitl.sh --gazebo --gps-denied
+# VOXL, RTAB-Map), without drift. Loaded by: ./run_sitl.sh --gazebo --nav vicon (alias --gps-denied).
+# For a real VIO/SLAM running on a companion computer use --nav extnav (nav_extnav.parm).
 # Same as ArduPilot's Tools/autotest/default_params/copter-vicon.parm, plus noise.
 
 AHRS_EKF_TYPE    3

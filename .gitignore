@@ -3,3 +3,9 @@ build.log
 cmake.log
 __pycache__/
 *.pyc
+# ego_ws colcon output
+ego_ws/build/
+ego_ws/install/
+ego_ws/log/
+# symphony python virtualenv
+symphony/.venv/

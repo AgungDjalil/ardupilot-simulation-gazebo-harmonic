@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CycloneDDS for the simulation's sensors when the algorithm runs on this laptop too
+  (run_ros_bridge.sh, default net local): loopback only, any ROS domain. The same settings as
+  ego_planner_ws's config/cyclonedds.xml (the real drone's stack run on the laptop): keep both alike.
+
+  - Loopback only: plugging a cable or a WiFi reconnect doesn't break the simulation. Without
+    multicast on lo, discovery is unicast to localhost; MaxAutoParticipantIndex must exceed the
+    number of ROS processes on this laptop.
+  - Camera data is tens of MB/s (D455 colour 0.9 MB + depth 0.6 MB per frame at 15 Hz, to each
+    reader; infrared pair +0.8 MB): large socket buffers, else datagrams are dropped and reliable
+    writers block. Requires /etc/sysctl.d/60-ros2-dds-buffers.conf (rmem_max/wmem_max 64 MiB).
+-->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface name="lo"/>
+      </Interfaces>
+      <AllowMulticast>false</AllowMulticast>
+      <!-- Fewer, larger datagrams (loopback MTU is 64 kB). -->
+      <MaxMessageSize>65500B</MaxMessageSize>
+    </General>
+    <Discovery>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <MaxAutoParticipantIndex>120</MaxAutoParticipantIndex>
+      <Peers>
+        <Peer address="127.0.0.1"/>
+      </Peers>
+    </Discovery>
+    <Internal>
+      <!-- Must stay <= net.core.rmem_max. -->
+      <SocketReceiveBufferSize min="16MB" max="64MB"/>
+      <!-- Unacknowledged data a reliable writer may hold before blocking (default 500 kB, i.e.
+           less than one rgbd_image): lets bridges keep publishing while readers catch up. -->
+      <Watermarks>
+        <WhcHigh>8MB</WhcHigh>
+      </Watermarks>
+    </Internal>
+  </Domain>
+</CycloneDDS>
