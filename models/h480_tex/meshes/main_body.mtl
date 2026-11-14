@@ -1,0 +1,36 @@
+newmtl shell
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.350 0.350 0.350
+Ns 40
+d 1.0
+illum 2
+map_Kd textures/shell.png
+
+newmtl belly
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.200 0.200 0.200
+Ns 20
+d 1.0
+illum 2
+map_Kd textures/belly.png
+
+newmtl arm
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.400 0.400 0.400
+Ns 50
+d 1.0
+illum 2
+map_Kd textures/arm.png
+
+newmtl motor
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.750 0.750 0.750
+Ns 90
+d 1.0
+illum 2
+map_Kd textures/motor.png
+

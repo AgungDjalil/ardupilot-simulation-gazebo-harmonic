@@ -1,0 +1,60 @@
+newmtl paint
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.550 0.550 0.550
+Ns 60
+d 1.0
+illum 2
+map_Kd textures/paint.png
+
+newmtl trim
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.100 0.100 0.100
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/trim.png
+
+newmtl tyre
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 5
+d 1.0
+illum 2
+map_Kd textures/tyre.png
+
+newmtl rim
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.700 0.700 0.700
+Ns 80
+d 1.0
+illum 2
+map_Kd textures/rim.png
+
+newmtl glass
+Ka 0.036 0.054 0.072
+Kd 0.060 0.090 0.120
+Ks 0.900 0.900 0.900
+Ns 120
+d 1.0
+illum 2
+
+newmtl headlight
+Ka 0.552 0.564 0.588
+Kd 0.920 0.940 0.980
+Ks 0.900 0.900 0.900
+Ns 120
+d 1.0
+illum 2
+
+newmtl taillight
+Ka 0.420 0.030 0.030
+Kd 0.700 0.050 0.050
+Ks 0.800 0.800 0.800
+Ns 100
+d 1.0
+illum 2
+

@@ -1,0 +1,42 @@
+newmtl carbon
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.500 0.500 0.500
+Ns 70
+d 1.0
+illum 2
+map_Kd textures/carbon.png
+
+newmtl payload
+Ka 0.372 0.378 0.360
+Kd 0.620 0.630 0.600
+Ks 0.300 0.300 0.300
+Ns 30
+d 1.0
+illum 2
+
+newmtl motor
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.700 0.700 0.700
+Ns 80
+d 1.0
+illum 2
+map_Kd textures/motor.png
+
+newmtl gear
+Ka 0.030 0.030 0.030
+Kd 0.050 0.050 0.050
+Ks 0.200 0.200 0.200
+Ns 20
+d 1.0
+illum 2
+
+newmtl prop
+Ka 0.072 0.072 0.078
+Kd 0.120 0.120 0.130
+Ks 0.300 0.300 0.300
+Ns 30
+d 1.0
+illum 2
+

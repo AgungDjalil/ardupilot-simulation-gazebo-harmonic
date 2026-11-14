@@ -1,0 +1,186 @@
+newmtl body
+Ka 0.216 0.246 0.216
+Kd 0.360 0.410 0.360
+Ks 0.120 0.120 0.120
+Ns 20
+d 1.0
+illum 2
+
+newmtl canopy
+Ka 0.198 0.228 0.198
+Kd 0.330 0.380 0.330
+Ks 0.100 0.100 0.100
+Ns 18
+d 1.0
+illum 2
+
+newmtl trim
+Ka 0.033 0.036 0.033
+Kd 0.055 0.060 0.055
+Ks 0.150 0.150 0.150
+Ns 20
+d 1.0
+illum 2
+
+newmtl glass
+Ka 0.015 0.018 0.021
+Kd 0.025 0.030 0.035
+Ks 0.650 0.650 0.650
+Ns 90
+d 1.0
+illum 2
+
+newmtl deck
+Ka 0.516 0.522 0.516
+Kd 0.860 0.870 0.860
+Ks 0.100 0.100 0.100
+Ns 15
+d 1.0
+illum 2
+
+newmtl seam
+Ka 0.096 0.108 0.096
+Kd 0.160 0.180 0.160
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+
+newmtl orange
+Ka 0.600 0.300 0.048
+Kd 1.000 0.500 0.080
+Ks 0.300 0.300 0.300
+Ns 40
+d 1.0
+illum 2
+
+newmtl white
+Ka 0.558 0.558 0.558
+Kd 0.930 0.930 0.930
+Ks 0.300 0.300 0.300
+Ns 40
+d 1.0
+illum 2
+
+newmtl red
+Ka 0.372 0.024 0.024
+Kd 0.620 0.040 0.040
+Ks 0.300 0.300 0.300
+Ns 40
+d 1.0
+illum 2
+
+newmtl tyre
+Ka 0.024 0.024 0.025
+Kd 0.040 0.040 0.042
+Ks 0.050 0.050 0.050
+Ns 8
+d 1.0
+illum 2
+
+newmtl rim
+Ka 0.096 0.099 0.102
+Kd 0.160 0.165 0.170
+Ks 0.400 0.400 0.400
+Ns 50
+d 1.0
+illum 2
+
+newmtl silver
+Ka 0.396 0.402 0.414
+Kd 0.660 0.670 0.690
+Ks 0.600 0.600 0.600
+Ns 70
+d 1.0
+illum 2
+
+newmtl label
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.100 0.100 0.100
+Ns 15
+d 1.0
+illum 2
+map_Kd textures/label.png
+
+newmtl pad1
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad1.png
+
+newmtl pad2
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad2.png
+
+newmtl pad3
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad3.png
+
+newmtl pad4
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad4.png
+
+newmtl pad5
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad5.png
+
+newmtl pad7
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad7.png
+
+newmtl pad8
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad8.png
+
+newmtl pad9
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad9.png
+
+newmtl pad6
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.050 0.050 0.050
+Ns 10
+d 1.0
+illum 2
+map_Kd textures/pad6.png
+

@@ -1,0 +1,204 @@
+<?xml version="1.0" ?>
+<!-- N°COMMAND R23 command vehicle, deployed, as on the R23 render on Symphony's landing page
+     (public/landing/r23-seq): a Toyota Hilux Double Cab in olive drab with a darker canopy over the bed (N°COMMAND
+     on its rear face), the canopy roof slid back 1.5 m, both side panels opened flat, the main cassettes slid out
+     1 m and the outer extensions 0.88 m beyond them, eight landing pads, the hexa in its bay, a snorkel.
+     Frame and dimensions are Symphony's (src/components/hud/vehicle/PanggungR23.tsx, R23 constants; CAD frame:
+     metres, Z up, Y towards the rear, X to the vehicle's left, model origin on the ground under the front
+     bumper's centre). Pad centres (deck top z = 1.095):
+       main left (+1.42, 4.115) (+1.42, 4.905)   main right (-1.42, 4.115) (-1.42, 4.905)
+       outer left (+2.30, 4.115) (+2.30, 4.905)  outer right (-2.30, 4.115) (-2.30, 4.905)
+     Meshes: symphony/convert_r23.mjs from Symphony public/models/r23; parts, colours and textures:
+     symphony/texture_r23.py (*_tex.obj with .mtl, materials/textures for the boxes).
+     Collisions are boxes: an OBJ mesh as a collision shape crashes DART's Bullet detector.
+     Body: "2026 Toyota Hilux" by missyubibi attage, CC-BY-4.0
+       https://sketchfab.com/3d-models/2026-toyota-hilux-9743da567da24663a92c33619fe06746 -->
+<sdf version="1.9">
+  <model name="r23_hilux">
+    <static>true</static>
+    <link name="body">
+      <visual name="body">
+        <geometry><mesh><uri>model://r23_hilux/meshes/hilux_tex.obj</uri></mesh></geometry>
+      </visual>
+      <collision name="hood">
+        <pose>0 0.775 0.725 0 0 0</pose>
+        <geometry><box><size>1.9 1.45 0.75</size></box></geometry>
+      </collision>
+      <collision name="cab">
+        <pose>0 2.625 1.095 0 0 0</pose>
+        <geometry><box><size>1.9 2.25 1.49</size></box></geometry>
+      </collision>
+      <collision name="bed">
+        <pose>0 4.575 0.705 0 0 0</pose>
+        <geometry><box><size>1.9 1.55 0.71</size></box></geometry>
+      </collision>
+      <visual name="snorkel">
+        <pose>-1.03 1.42 1.32 0 0 0</pose>
+        <geometry><cylinder><radius>0.045</radius><length>0.86</length></cylinder></geometry>
+        <material><ambient>0.07 0.08 0.08 1</ambient><diffuse>0.12 0.13 0.13 1</diffuse><pbr><metal><metalness>0.2</metalness><roughness>0.7</roughness></metal></pbr></material>
+      </visual>
+      <visual name="snorkel_head">
+        <pose>-1.03 1.36 1.78 0 0 0</pose>
+        <geometry><box><size>0.10 0.16 0.08</size></box></geometry>
+        <material><ambient>0.07 0.08 0.08 1</ambient><diffuse>0.12 0.13 0.13 1</diffuse><pbr><metal><metalness>0.2</metalness><roughness>0.7</roughness></metal></pbr></material>
+      </visual>
+      <visual name="canopy_front">
+        <pose>0 3.815 1.515 0 0 0</pose>
+        <geometry><box><size>1.80 0.03 0.91</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/canopy.png</albedo_map><metalness>0.1</metalness><roughness>0.7</roughness></metal></pbr></material>
+      </visual>
+      <collision name="canopy_front">
+        <pose>0 3.815 1.515 0 0 0</pose>
+        <geometry><box><size>1.80 0.03 0.91</size></box></geometry>
+      </collision>
+      <visual name="canopy_rear">
+        <pose>0 5.345 1.515 0 0 0</pose>
+        <geometry><box><size>1.80 0.03 0.91</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/label.png</albedo_map><metalness>0.1</metalness><roughness>0.7</roughness></metal></pbr></material>
+      </visual>
+      <collision name="canopy_rear">
+        <pose>0 5.345 1.515 0 0 0</pose>
+        <geometry><box><size>1.80 0.03 0.91</size></box></geometry>
+      </collision>
+      <visual name="canopy_roof">
+        <pose>0 6.08 1.985 0 0 0</pose>
+        <geometry><box><size>1.84 1.56 0.03</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/canopy.png</albedo_map><metalness>0.1</metalness><roughness>0.7</roughness></metal></pbr></material>
+      </visual>
+      <collision name="canopy_roof">
+        <pose>0 6.08 1.985 0 0 0</pose>
+        <geometry><box><size>1.84 1.56 0.03</size></box></geometry>
+      </collision>
+      <visual name="roof_rail_l">
+        <pose>0.89 5.33 1.955 0 0 0</pose>
+        <geometry><box><size>0.04 3.06 0.04</size></box></geometry>
+        <material><ambient>0.27 0.28 0.28 1</ambient><diffuse>0.45 0.46 0.47 1</diffuse><pbr><metal><metalness>0.8</metalness><roughness>0.4</roughness></metal></pbr></material>
+      </visual>
+      <visual name="roof_rail_r">
+        <pose>-0.89 5.33 1.955 0 0 0</pose>
+        <geometry><box><size>0.04 3.06 0.04</size></box></geometry>
+        <material><ambient>0.27 0.28 0.28 1</ambient><diffuse>0.45 0.46 0.47 1</diffuse><pbr><metal><metalness>0.8</metalness><roughness>0.4</roughness></metal></pbr></material>
+      </visual>
+      <visual name="bay_floor">
+        <pose>0 4.58 1.045 0 0 0</pose>
+        <geometry><box><size>1.78 1.50 0.03</size></box></geometry>
+        <material><ambient>0.07 0.08 0.08 1</ambient><diffuse>0.12 0.13 0.13 1</diffuse><pbr><metal><metalness>0.2</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <collision name="bay_floor">
+        <pose>0 4.58 1.045 0 0 0</pose>
+        <geometry><box><size>1.78 1.50 0.03</size></box></geometry>
+      </collision>
+      <visual name="panel_left">
+        <pose>1.340 4.58 1.05 0 0 0</pose>
+        <geometry><box><size>0.88 1.50 0.02</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/canopy.png</albedo_map><metalness>0.1</metalness><roughness>0.7</roughness></metal></pbr></material>
+      </visual>
+      <visual name="rail_left">
+        <pose>1.170 4.51 1.064 0 0 0</pose>
+        <geometry><box><size>0.50 1.30 0.02</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/rail.png</albedo_map><metalness>0.8</metalness><roughness>0.4</roughness></metal></pbr></material>
+      </visual>
+      <visual name="deck_left">
+        <pose>1.420 4.51 1.083 0 0 0</pose>
+        <geometry><box><size>0.80 1.50 0.024</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/deck.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <collision name="deck_left">
+        <pose>1.420 4.51 1.035 0 0 0</pose>
+        <geometry><box><size>0.80 1.50 0.12</size></box></geometry>
+      </collision>
+      <visual name="ext_rail_left">
+        <pose>1.860 4.51 1.072 0 0 0</pose>
+        <geometry><box><size>0.16 1.40 0.016</size></box></geometry>
+        <material><ambient>0.27 0.28 0.28 1</ambient><diffuse>0.45 0.46 0.47 1</diffuse><pbr><metal><metalness>0.8</metalness><roughness>0.4</roughness></metal></pbr></material>
+      </visual>
+      <visual name="ext_deck_left">
+        <pose>2.300 4.51 1.088 0 0 0</pose>
+        <geometry><box><size>0.78 1.50 0.012</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/deck.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <collision name="ext_deck_left">
+        <pose>2.300 4.51 1.034 0 0 0</pose>
+        <geometry><box><size>0.78 1.50 0.12</size></box></geometry>
+      </collision>
+      <visual name="pad_left_front">
+        <pose>1.420 4.115 1.0965 0 0 0</pose>
+        <geometry><box><size>0.60 0.60 0.003</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/pad_marks.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <visual name="pad_left_outer_front">
+        <pose>2.300 4.115 1.0955 0 0 0</pose>
+        <geometry><box><size>0.60 0.60 0.003</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/pad_marks.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <visual name="pad_left_rear">
+        <pose>1.420 4.905 1.0965 0 0 0</pose>
+        <geometry><box><size>0.60 0.60 0.003</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/pad_marks.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <visual name="pad_left_outer_rear">
+        <pose>2.300 4.905 1.0955 0 0 0</pose>
+        <geometry><box><size>0.60 0.60 0.003</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/pad_marks.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <visual name="panel_right">
+        <pose>-1.340 4.58 1.05 0 0 0</pose>
+        <geometry><box><size>0.88 1.50 0.02</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/canopy.png</albedo_map><metalness>0.1</metalness><roughness>0.7</roughness></metal></pbr></material>
+      </visual>
+      <visual name="rail_right">
+        <pose>-1.170 4.51 1.064 0 0 0</pose>
+        <geometry><box><size>0.50 1.30 0.02</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/rail.png</albedo_map><metalness>0.8</metalness><roughness>0.4</roughness></metal></pbr></material>
+      </visual>
+      <visual name="deck_right">
+        <pose>-1.420 4.51 1.083 0 0 0</pose>
+        <geometry><box><size>0.80 1.50 0.024</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/deck.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <collision name="deck_right">
+        <pose>-1.420 4.51 1.035 0 0 0</pose>
+        <geometry><box><size>0.80 1.50 0.12</size></box></geometry>
+      </collision>
+      <visual name="ext_rail_right">
+        <pose>-1.860 4.51 1.072 0 0 0</pose>
+        <geometry><box><size>0.16 1.40 0.016</size></box></geometry>
+        <material><ambient>0.27 0.28 0.28 1</ambient><diffuse>0.45 0.46 0.47 1</diffuse><pbr><metal><metalness>0.8</metalness><roughness>0.4</roughness></metal></pbr></material>
+      </visual>
+      <visual name="ext_deck_right">
+        <pose>-2.300 4.51 1.088 0 0 0</pose>
+        <geometry><box><size>0.78 1.50 0.012</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/deck.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <collision name="ext_deck_right">
+        <pose>-2.300 4.51 1.034 0 0 0</pose>
+        <geometry><box><size>0.78 1.50 0.12</size></box></geometry>
+      </collision>
+      <visual name="pad_right_front">
+        <pose>-1.420 4.115 1.0965 0 0 0</pose>
+        <geometry><box><size>0.60 0.60 0.003</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/pad_marks.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <visual name="pad_right_outer_front">
+        <pose>-2.300 4.115 1.0955 0 0 0</pose>
+        <geometry><box><size>0.60 0.60 0.003</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/pad_marks.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <visual name="pad_right_rear">
+        <pose>-1.420 4.905 1.0965 0 0 0</pose>
+        <geometry><box><size>0.60 0.60 0.003</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/pad_marks.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <visual name="pad_right_outer_rear">
+        <pose>-2.300 4.905 1.0955 0 0 0</pose>
+        <geometry><box><size>0.60 0.60 0.003</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://r23_hilux/materials/textures/pad_marks.png</albedo_map><metalness>0.1</metalness><roughness>0.8</roughness></metal></pbr></material>
+      </visual>
+      <!-- Hexa parked in its bay (skid at z = 1.39); visual only, it does not fly -->
+      <visual name="hexa">
+        <pose>0 4.61 1.39 0 0 0</pose>
+        <geometry><mesh><uri>model://r23_hilux/meshes/hexa_tex.obj</uri></mesh></geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

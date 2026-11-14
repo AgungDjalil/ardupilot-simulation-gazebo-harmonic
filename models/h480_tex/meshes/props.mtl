@@ -1,0 +1,17 @@
+newmtl blade
+Ka 0.042 0.042 0.045
+Kd 0.070 0.070 0.075
+Ks 0.550 0.550 0.550
+Ns 80
+d 1.0
+illum 2
+
+newmtl hub
+Ka 0.600 0.600 0.600
+Kd 1.000 1.000 1.000
+Ks 0.800 0.800 0.800
+Ns 90
+d 1.0
+illum 2
+map_Kd textures/hub.png
+
